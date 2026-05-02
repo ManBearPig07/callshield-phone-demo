@@ -1,0 +1,1135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; media-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>CallShield Public Phone Demo</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink:#17202a;
+      --muted:#5b6673;
+      --line:#d8dee6;
+      --bg:#f4f6f8;
+      --panel:#ffffff;
+      --soft:#eef6f4;
+      --accent:#0f766e;
+      --accent-dark:#0b4f4a;
+      --blue:#245c9a;
+      --amber:#9a5d13;
+      --red:#a53a3a;
+      --green:#13795b;
+      --shadow:0 8px 24px rgba(23, 32, 42, 0.08);
+    }
+    * { box-sizing:border-box; }
+    html { background:var(--bg); }
+    body { margin:0; font-family:Arial, Helvetica, sans-serif; color:var(--ink); background:var(--bg); }
+    [hidden] { display:none !important; }
+    button, input, select, textarea { font:inherit; }
+    button, a { -webkit-tap-highlight-color:transparent; }
+    button { min-height:48px; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
+      outline:3px solid #8fd7ca;
+      outline-offset:2px;
+    }
+    .shell { max-width:1160px; margin:0 auto; padding:0 18px 34px; }
+    .hero { background:#15242d; color:#fff; padding:22px 0 18px; }
+    .hero-grid { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(280px,0.8fr); gap:18px; align-items:end; }
+    .eyebrow { display:inline-flex; gap:8px; align-items:center; margin:0 0 10px; color:#d9f2ed; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0; }
+    .dot { width:9px; height:9px; border-radius:999px; background:#48cdbb; display:inline-block; }
+    h1 { margin:0; font-size:38px; line-height:1.08; letter-spacing:0; }
+    h2 { margin:0 0 10px; font-size:25px; letter-spacing:0; }
+    h3 { margin:0 0 8px; font-size:17px; letter-spacing:0; }
+    p { line-height:1.48; }
+    .hero p { color:#e4eef2; max-width:860px; font-size:17px; }
+    .hero-card { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:16px; }
+    .hero-card strong { display:block; color:#fff; margin-bottom:6px; }
+    .hero-card span { display:block; color:#e4eef2; line-height:1.42; }
+    .trust-strip { display:flex; gap:8px; flex-wrap:wrap; margin:14px 0 0; }
+    .sticky-nav { position:sticky; top:0; z-index:10; background:rgba(255,255,255,0.98); border-bottom:1px solid var(--line); backdrop-filter:blur(10px); }
+    .tabs { display:flex; gap:6px; overflow-x:auto; padding:10px 0; scrollbar-width:none; }
+    .tabs::-webkit-scrollbar { display:none; }
+    .tabs button { flex:0 0 auto; border:1px solid var(--line); background:#fff; color:#26313d; padding:10px 13px; border-radius:8px; cursor:pointer; min-height:48px; }
+    .tabs button[aria-selected="true"] { background:var(--accent); color:#fff; border-color:var(--accent); }
+    main { padding-top:18px; }
+    section.tab { scroll-margin-top:86px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; }
+    .split { display:grid; grid-template-columns:minmax(280px,0.92fr) minmax(320px,1.08fr); gap:14px; }
+    .panel, .card, .scenario-card, .verdict-card, .seed-success { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:16px; box-shadow:var(--shadow); }
+    .soft { background:#f9fbfc; box-shadow:none; }
+    .lead { color:var(--muted); font-size:16px; max-width:920px; }
+    .callout { border-left:4px solid var(--accent); background:#eefaf7; border-radius:6px; padding:12px 14px; margin:14px 0; }
+    .callout.warn { border-left-color:var(--amber); background:#fff7ec; }
+    .callout.danger { border-left-color:var(--red); background:#fff3f3; }
+    .status-row { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0; }
+    .pill, .badge { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line); border-radius:999px; padding:6px 10px; background:#fff; color:#334150; font-size:13px; font-weight:700; }
+    .pill.good, .badge.booked { border-color:#a8dbc7; color:#0f684e; background:#effaf5; }
+    .pill.warn, .badge.human { border-color:#efc48b; color:#8a4a0a; background:#fff8ed; }
+    .pill.blue, .badge.waste { border-color:#bad2ee; color:#1d4f86; background:#f0f6ff; }
+    .badge.bad { border-color:#efb4b4; color:#8d2727; background:#fff3f3; }
+    .badge.future { border-color:#c9b8ef; color:#52368d; background:#f6f1ff; }
+    .actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+    .actions.stack { display:grid; grid-template-columns:1fr; }
+    button.primary, button.secondary { border-radius:8px; padding:10px 14px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+    button.primary { background:var(--accent); color:#fff; border:1px solid var(--accent); }
+    button.secondary { background:#fff; color:var(--ink); border:1px solid var(--line); }
+    label { display:block; margin:12px 0 5px; font-weight:700; }
+    input, select, textarea { width:100%; border:1px solid #b8c1cc; border-radius:8px; padding:12px; background:#fff; color:var(--ink); min-height:48px; }
+    textarea { min-height:118px; resize:vertical; }
+    pre { white-space:pre-wrap; overflow:auto; min-height:112px; background:#0f1720; color:#edf5ff; padding:14px; border-radius:8px; }
+    details { margin-top:12px; }
+    summary { min-height:48px; display:flex; align-items:center; cursor:pointer; font-weight:700; }
+    table { width:100%; border-collapse:collapse; background:#fff; }
+    th, td { padding:10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+    th { background:#eef2f6; font-size:13px; }
+    .table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:8px; background:#fff; }
+    .mini-label { color:var(--muted); font-size:13px; margin:0 0 4px; }
+    .metric { display:block; font-size:27px; line-height:1; margin:4px 0 6px; color:#111827; }
+    .path-list { display:grid; gap:10px; margin:16px 0; padding:0; list-style:none; }
+    .path-step { display:grid; grid-template-columns:34px minmax(0,1fr); gap:10px; align-items:start; border:1px solid var(--line); background:#fff; border-radius:8px; padding:10px; }
+    .path-num { width:30px; height:30px; border-radius:999px; display:grid; place-items:center; background:#e6f4f2; color:var(--accent-dark); font-weight:700; }
+    .path-step.done .path-num { background:var(--accent); color:#fff; }
+    .path-step strong { display:block; }
+    .progress-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:8px; margin:14px 0; }
+    .progress-item { border:1px solid var(--line); border-radius:8px; padding:10px; background:#fff; color:#42505e; font-size:13px; font-weight:700; }
+    .progress-item.done { border-color:#a8dbc7; background:#effaf5; color:#0f684e; }
+    .scenario-list { display:grid; gap:12px; }
+    .scenario-card { display:grid; gap:8px; }
+    .scenario-card p { margin:0; color:var(--muted); }
+    .scenario-card .mini-label { margin-top:4px; }
+    .verdict-card { margin:0 0 12px; border-top:4px solid var(--accent); }
+    .verdict-card.human { border-top-color:var(--amber); }
+    .verdict-card.bad { border-top-color:var(--red); }
+    .verdict-card.future { border-top-color:#8261c6; }
+    .verdict-grid, .summary-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
+    .summary-tile { background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px; }
+    .event-list { display:grid; gap:10px; margin-top:14px; }
+    .event-card { border:1px solid var(--line); background:#fff; border-radius:8px; padding:12px; }
+    .event-card-top { display:flex; justify-content:space-between; gap:8px; align-items:flex-start; margin-bottom:8px; }
+    .event-status { flex:0 0 auto; }
+    .event-card p { margin:5px 0; color:var(--muted); }
+    .csv-box { margin-top:12px; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    .footer-action { position:fixed; left:0; right:0; bottom:0; z-index:11; background:rgba(255,255,255,0.98); border-top:1px solid var(--line); padding:10px 14px calc(10px + env(safe-area-inset-bottom)); display:none; }
+    .footer-action button { width:100%; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; }
+    }
+    @media (max-width:860px) {
+      .hero-grid, .split { grid-template-columns:1fr; }
+      h1 { font-size:31px; }
+    }
+    @media (max-width:560px) {
+      .shell { padding:0 14px 112px; }
+      .hero p { font-size:15px; }
+      h1 { font-size:27px; }
+      h2 { font-size:22px; }
+      .tabs { padding:9px 0; }
+      .tabs button { padding:10px 11px; }
+      .grid, .summary-strip, .verdict-grid { grid-template-columns:1fr; }
+      .actions { display:grid; grid-template-columns:1fr; }
+      .card, .panel, .scenario-card, .verdict-card, .seed-success { padding:14px; box-shadow:none; }
+      th, td { padding:8px; font-size:13px; }
+      .footer-action { display:block; }
+    }
+  </style>
+</head>
+<body>
+  <noscript>
+    <div class="shell">
+      <div class="callout danger"><strong>JavaScript is required.</strong> This static phone demo runs entirely in the browser and needs JavaScript to classify scenarios, update the ledger, export CSV, and copy the Seth handoff text.</div>
+    </div>
+  </noscript>
+
+  <header class="hero">
+    <div class="shell hero-grid">
+      <div>
+        <p class="eyebrow"><span class="dot"></span>Public static phone demo</p>
+        <h1>Recover paid inbound calls before they become lost revenue.</h1>
+        <p>CallShield classifies paid inbound calls, escalates risk to a human, separates lead waste, and proves recovered gross profit with a Lead Waste Ledger.</p>
+        <div class="trust-strip" aria-label="Demo trust notes">
+          <span class="pill good">Static phone demo</span>
+          <span class="pill blue">No live calls</span>
+          <span class="pill blue">No payment capture</span>
+          <span class="pill blue">No cold calling</span>
+          <span class="pill warn">Safety escalates to human</span>
+        </div>
+      </div>
+      <div class="hero-card">
+        <strong>90-second guided path</strong>
+        <span>Seed the demo, run Home inspection, run HVAC, trigger Safety escalation, then open Ledger, ROI, and copy the text to Seth.</span>
+        <div class="actions stack">
+          <button class="primary" type="button" onclick="seedPhoneDemo(true)">Run phone demo seed</button>
+          <button class="secondary" type="button" onclick="showTab('demo')">Next: Try scenarios</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sticky-nav" aria-label="CallShield demo navigation">
+    <div class="shell">
+      <div class="tabs" role="tablist" aria-label="CallShield public demo sections">
+        <button id="tab-start" role="tab" aria-selected="true" aria-controls="start" tabindex="0" data-tab="start">Start</button>
+        <button id="tab-demo" role="tab" aria-selected="false" aria-controls="demo" tabindex="-1" data-tab="demo">Live Demo</button>
+        <button id="tab-ledger" role="tab" aria-selected="false" aria-controls="ledger" tabindex="-1" data-tab="ledger">Ledger</button>
+        <button id="tab-model" role="tab" aria-selected="false" aria-controls="model" tabindex="-1" data-tab="model">ROI</button>
+        <button id="tab-stack" role="tab" aria-selected="false" aria-controls="stack" tabindex="-1" data-tab="stack">Integrations</button>
+        <button id="tab-wizard" role="tab" aria-selected="false" aria-controls="wizard" tabindex="-1" data-tab="wizard">Setup</button>
+        <button id="tab-handoff" role="tab" aria-selected="false" aria-controls="handoff" tabindex="-1" data-tab="handoff">Next</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="shell">
+    <p id="globalStatus" class="sr-only" aria-live="polite"></p>
+
+    <section id="start" class="tab" role="tabpanel" aria-labelledby="tab-start">
+      <h2>Start here</h2>
+      <p class="lead">CallShield is not a generic AI receptionist. It is a paid-lead recovery proof layer for home-service businesses that buy inbound calls and need to know what booked, what leaked, and what required a person.</p>
+
+      <div class="grid">
+        <div class="card"><h3>What pain it solves</h3><p>Owners spend on calls but cannot always see which calls became booked jobs, which were out of area, which were wrong service, and which wasted staff time.</p></div>
+        <div class="card"><h3>Why it is different</h3><p>Receptionists answer calls. CallShield classifies paid-call outcomes, preserves risk escalation, and proves recovered gross profit.</p></div>
+        <div class="card"><h3>Why home inspection first</h3><p>Home inspection has clear geography, clear service scope, urgent buyer intent, and clean ROI math.</p></div>
+        <div class="card"><h3>Why HVAC second</h3><p>HVAC has the same paid-call leakage, plus higher ticket values and real trust objections like licensed technicians, stocked trucks, and floor protection.</p></div>
+      </div>
+
+      <div class="panel soft" style="margin-top:14px">
+        <h3>Guided 90-second demo path</h3>
+        <ol class="path-list" id="guidedPath">
+          <li class="path-step" data-progress-step="seed"><span class="path-num">1</span><span><strong>Seed demo</strong>Load realistic in-browser ledger rows.</span></li>
+          <li class="path-step" data-progress-step="home"><span class="path-num">2</span><span><strong>Try Home inspection</strong>Book a buyer inspection call.</span></li>
+          <li class="path-step" data-progress-step="hvac"><span class="path-num">3</span><span><strong>Try HVAC</strong>Book a no-cold-air call with trust objections.</span></li>
+          <li class="path-step" data-progress-step="safety"><span class="path-num">4</span><span><strong>Trigger Safety escalation</strong>Gas or carbon monoxide goes to a human.</span></li>
+          <li class="path-step" data-progress-step="ledger"><span class="path-num">5</span><span><strong>View Ledger</strong>See booked calls, waste, and risk calls separated.</span></li>
+          <li class="path-step" data-progress-step="roi"><span class="path-num">6</span><span><strong>View ROI</strong>See recovered revenue, gross profit, and payback.</span></li>
+          <li class="path-step" data-progress-step="text"><span class="path-num">7</span><span><strong>Copy/share text</strong>Send Seth one hosted link.</span></li>
+        </ol>
+        <div class="progress-grid" id="progressGrid" aria-label="Demo progress"></div>
+      </div>
+
+      <div id="seedSuccess" class="seed-success" hidden>
+        <h3>Demo seeded.</h3>
+        <p>Next: tap Live Demo and try Home inspection or HVAC.</p>
+        <div class="actions">
+          <button class="primary" type="button" onclick="showTab('demo')">Next: Try scenarios</button>
+          <button class="secondary" type="button" onclick="showPhoneDashboard()">View Ledger</button>
+          <button class="secondary" type="button" onclick="showPhoneReport()">View ROI</button>
+        </div>
+      </div>
+
+      <div class="callout">Lead Waste Ledger value: CallShield separates recoverable bookings from paid-lead waste and human-risk calls, so the owner can see what the ad spend actually produced.</div>
+      <div class="actions">
+        <button class="primary" type="button" onclick="seedPhoneDemo(true)">Run phone demo seed</button>
+        <button class="secondary" type="button" onclick="showTab('demo')">Try Live Demo</button>
+      </div>
+    </section>
+
+    <section id="demo" class="tab" role="tabpanel" aria-labelledby="tab-demo" hidden>
+      <h2>Live Demo</h2>
+      <p class="lead">Tap a call card. CallShield will book it, escalate it, reject it, classify it as waste, or mark it as a future module. Names, addresses, and phone values are fictional demo data.</p>
+      <div class="split">
+        <div class="panel">
+          <h3>Realistic call scenarios</h3>
+          <div class="scenario-list" id="scenarioButtons"></div>
+        </div>
+        <div class="panel">
+          <h3>Intake result</h3>
+          <label for="callerName">Caller name</label>
+          <input id="callerName" value="Taylor Buyer" autocomplete="off">
+          <label for="zip">ZIP</label>
+          <input id="zip" inputmode="numeric" value="46220" autocomplete="off">
+          <label for="source">Lead source</label>
+          <select id="source"><option>Google LSA</option><option>PPC</option><option>After hours</option><option>Organic</option><option>Referral</option><option>Existing customer</option><option>Cold vendor</option></select>
+          <label for="message">Caller message</label>
+          <textarea id="message">I just put an offer on a home and need a comprehensive inspection quickly.</textarea>
+          <div class="actions">
+            <button class="primary" type="button" onclick="submitIntake()">Run intake</button>
+            <button class="secondary" type="button" onclick="showPhoneDashboard()">View Ledger</button>
+          </div>
+          <h3 style="margin-top:14px">Verdict</h3>
+          <div id="verdictArea" class="phone-output" aria-live="polite"></div>
+          <details>
+            <summary>Technical JSON</summary>
+            <pre id="intakeResult">Static phone demo is ready. Tap a scenario or run intake.</pre>
+          </details>
+          <p class="callout warn">Safety, legal, medical, rehab, angry caller, caller asks for a human, and low-confidence calls escalate to a person first. Deposit/payment link language is allowed; the demo never collects raw card data by voice.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="ledger" class="tab" role="tabpanel" aria-labelledby="tab-ledger" hidden>
+      <h2>Lead Waste Ledger</h2>
+      <p class="lead">CallShield separates recoverable bookings from paid-lead waste and human-risk calls, so the owner can see what the ad spend actually produced.</p>
+      <div class="actions">
+        <button class="primary" type="button" onclick="showPhoneDashboard()">Refresh Ledger</button>
+        <button class="secondary" type="button" onclick="showPhoneReport()">View ROI</button>
+        <button class="secondary" type="button" onclick="downloadPhoneCsv()">CSV export</button>
+        <button class="secondary" type="button" onclick="viewPhoneCsv()">View CSV</button>
+        <button class="secondary" type="button" onclick="copyPhoneCsv()">Copy CSV</button>
+      </div>
+      <p id="csvStatus" class="mini-label" aria-live="polite"></p>
+      <div id="phoneDashboard" class="phone-output"></div>
+      <div class="csv-box" id="csvBox" hidden>
+        <h3>CSV fallback</h3>
+        <p class="mini-label">No network transmission. This text stays in the browser.</p>
+        <pre id="csvOutput"></pre>
+      </div>
+    </section>
+
+    <section id="model" class="tab" role="tabpanel" aria-labelledby="tab-model" hidden>
+      <h2>ROI</h2>
+      <p class="lead">The business question is recovered gross profit, not call volume.</p>
+      <div class="callout"><strong>Seth takeaway:</strong> If one home inspector recovers 3 missed jobs per month at $575 revenue and 55% gross margin, that is about $949 recovered gross profit per month before setup economics.</div>
+      <div id="phoneReport" class="phone-output"></div>
+      <div class="split">
+        <div class="panel">
+          <h3>Editable model</h3>
+          <label for="bookings">Recovered booked calls per month</label>
+          <input id="bookings" type="number" min="0" value="3">
+          <label for="ticket">Average job revenue</label>
+          <input id="ticket" type="number" min="0" value="575">
+          <label for="margin">Gross margin</label>
+          <input id="margin" type="number" min="0" max="1" step="0.01" value="0.55">
+          <label for="fee">Monthly CallShield fee</label>
+          <input id="fee" type="number" min="0" value="999">
+          <label for="setup">Setup fee</label>
+          <input id="setup" type="number" min="0" value="2500">
+          <div class="actions"><button class="primary" type="button" onclick="calc()">Calculate ROI</button></div>
+        </div>
+        <div class="panel">
+          <h3>Financial model</h3>
+          <div class="summary-strip">
+            <div class="summary-tile"><p class="mini-label">Recovered revenue</p><strong class="metric" id="rev">$0</strong></div>
+            <div class="summary-tile"><p class="mini-label">Recovered gross profit</p><strong class="metric" id="gp">$0</strong></div>
+            <div class="summary-tile"><p class="mini-label">ROI multiple</p><strong class="metric" id="roi">0x</strong></div>
+            <div class="summary-tile"><p class="mini-label">Setup-fee payback</p><strong class="metric" id="payback">No payback</strong></div>
+          </div>
+          <div class="grid" style="margin-top:14px">
+            <div class="card soft"><h3>Why gross profit matters</h3><p>Gross profit is closer to what funds the monthly fee than top-line recovered revenue.</p></div>
+            <div class="card soft"><h3>Why home inspection first</h3><p>Clear service boundaries and urgent buyer timelines make the first pilot easy to evaluate.</p></div>
+            <div class="card soft"><h3>Why HVAC second</h3><p>No-cold-air calls bring higher value and rich trust objections that a ledger can preserve.</p></div>
+            <div class="card soft"><h3>Pilot decision rule</h3><p>Continue when recovered gross profit beats the monthly fee and critical escalation failures stay at zero.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="stack" class="tab" role="tabpanel" aria-labelledby="tab-stack" hidden>
+      <h2>Integrations</h2>
+      <p class="lead">This static demo installs nothing and calls no external APIs. Optional integrations stay behind provider interfaces after the local pilot proves ROI.</p>
+      <div class="status-row"><span class="pill">Pipecat</span><span class="pill">LiveKit</span><span class="pill">faster-whisper</span><span class="pill">Vosk</span><span class="pill">Piper</span><span class="pill">Ollama</span><span class="pill">llama.cpp</span><span class="pill">Asterisk</span><span class="pill">Node-RED</span><span class="pill">OpenTelemetry</span></div>
+      <div class="actions"><button class="primary" type="button" onclick="showPhoneIntegrations()">Show integrations JSON</button></div>
+      <pre id="phoneIntegrations">Tap Show integrations JSON.</pre>
+      <div class="callout">Hosted-demo readiness: this page is safe to host as a static demo. It does not expose the private repo, does not call external APIs, does not require live phone service, and should be sent to Seth only as the hosted URL for this page.</div>
+    </section>
+
+    <section id="wizard" class="tab" role="tabpanel" aria-labelledby="tab-wizard" hidden>
+      <h2>Setup</h2>
+      <p class="lead">A nontechnical user can generate valid customer config JSON for a first pilot. The generated JSON stays in the browser.</p>
+      <div class="split">
+        <div class="panel">
+          <label for="wName">Business name</label>
+          <input id="wName" value="Demo Home Services">
+          <label for="wVertical">Vertical</label>
+          <select id="wVertical"><option>home inspection</option><option>HVAC</option><option>plumbing</option><option>roofing</option><option>electrical</option></select>
+          <label for="wZips">ZIP codes</label>
+          <input id="wZips" value="46220,46205,46240,46208">
+          <label for="wServices">Services</label>
+          <input id="wServices" value="home inspection,HVAC,AC diagnostic,pre-listing inspection">
+          <label for="wWrongServices">Wrong-service phrases</label>
+          <input id="wWrongServices" value="mold remediation,appraisal,roof repair,lead resale">
+          <label for="wKeywords">Booking keywords</label>
+          <input id="wKeywords" value="book,schedule,inspection,appointment,not cold,same day,diagnostic">
+          <label for="wTicket">Average job revenue</label>
+          <input id="wTicket" type="number" value="650">
+          <label for="wMonthly">Monthly fee</label>
+          <input id="wMonthly" type="number" value="999">
+          <label for="wSetup">Setup fee</label>
+          <input id="wSetup" type="number" value="2500">
+          <label for="wMargin">Gross margin</label>
+          <input id="wMargin" type="number" min="0" max="1" step="0.01" value="0.52">
+          <label for="wSlots">Appointment slots</label>
+          <input id="wSlots" value="Same-day afternoon,Next Thursday morning,Weekday mornings">
+          <label for="wRisks">Risk escalation rules</label>
+          <input id="wRisks" value="gas smell,carbon monoxide,electrical burning,active flooding,fire,legal advice,medical,rehab,human request,angry caller,low confidence">
+          <div class="actions"><button class="primary" type="button" onclick="makeConfig()">Generate JSON</button></div>
+        </div>
+        <div class="panel">
+          <h3>Generated config</h3>
+          <pre id="configOut"></pre>
+          <div class="callout">Save this as a customer config inside the private repo only when Gary is ready to run the local server demo.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="handoff" class="tab" role="tabpanel" aria-labelledby="tab-handoff" hidden>
+      <h2>Next</h2>
+      <div class="grid">
+        <div class="card"><h3>What Seth should do</h3><p>Review whether the story is clear enough to send to one home inspection pilot customer.</p></div>
+        <div class="card"><h3>Pilot ask</h3><p>Run a two-week paid-lead recovery pilot with human review on safety, regulated, angry caller, human request, and low-confidence calls.</p></div>
+        <div class="card"><h3>Future module boundary</h3><p>Existing-customer feedback is a future add-on only. It is not outbound cold calling and not part of core paid-lead intake.</p></div>
+      </div>
+      <pre id="textMessage" aria-label="Text message to Seth"></pre>
+      <div class="actions">
+        <button class="primary" type="button" onclick="copyTextMessage()">Copy text to Seth</button>
+        <button class="secondary" type="button" onclick="shareDemo()">Share this demo</button>
+      </div>
+      <p id="copyStatus" class="mini-label" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <div class="footer-action">
+    <button id="mobileCta" class="primary" type="button" onclick="mobileCtaAction()">Run phone demo seed</button>
+  </div>
+
+  <script>
+    const DEMO_CONFIG = {
+      avg_ticket: 650,
+      gross_margin: 0.52,
+      monthly_fee: 999,
+      service_zips: ['46220', '46205', '46240', '46208'],
+      services: ['home inspection', 'inspection', 'hvac', 'ac', 'air conditioner', 'cooling', 'furnace', 'heat pump', 'comprehensive inspection', 'diagnostic'],
+      wrong_service_terms: ['mold remediation', 'remediation', 'appraisal', 'roof repair', 'lead resale', 'pest control'],
+      keywords: ['book', 'schedule', 'inspection', 'appointment', 'quote', 'available', 'not cold', 'no cold air', 'same day', 'diagnostic', 'next thursday', 'dispatch', 'technician']
+    };
+    const SAFETY_TERMS = ['gas smell', 'smell gas', 'carbon monoxide', 'co alarm', 'electrical burning', 'burning smell', 'active flooding', 'fire', 'legal advice', 'lawyer', 'medical', 'rehab', 'crisis', 'human', 'representative', 'a person', 'real person', 'talk to a person', 'speak to a person', 'angry', 'furious', 'low confidence'];
+    const SPAM_TERMS = ['seo', 'marketing agency', 'vendor', 'sell you', 'lead resale', 'extended warranty', 'merchant services'];
+    const PHONE_INTEGRATIONS = ['Pipecat', 'LiveKit', 'faster-whisper', 'Vosk', 'Piper', 'Ollama', 'llama.cpp', 'Asterisk', 'Node-RED', 'OpenTelemetry'];
+    const PROGRESS_LABELS = {
+      seed: 'Demo seeded',
+      home: 'Home inspection run',
+      hvac: 'HVAC run',
+      safety: 'Safety run',
+      ledger: 'Ledger viewed',
+      roi: 'ROI viewed',
+      csv: 'CSV exported or copied',
+      text: 'Text copied or shared'
+    };
+    const progress = Object.fromEntries(Object.keys(PROGRESS_LABELS).map(key => [key, false]));
+    const SCENARIOS = {
+      home_inspection_buyer_fast_schedule: {
+        label: 'Home inspection buyer booking',
+        short_label: 'Home inspection',
+        caller: 'Taylor Buyer',
+        zip: '46220',
+        source: 'Google LSA',
+        vertical: 'home inspection',
+        revenue: 575,
+        margin: 0.55,
+        progress: 'home',
+        intent: 'Buyer needs an inspection quickly after making an offer.',
+        should_do: 'Book a comprehensive buyer inspection and capture report, access, pets, certification, and deposit-link questions.',
+        proves: 'Home inspection is a clean first pilot with urgent buyer intent and clear gross-profit math.',
+        value: '$316 recovered gross profit',
+        message: 'I just put an offer on a home and need a comprehensive home inspection quickly. What inspection is best for a buyer, how long does it take, how is the report delivered, what is the price, are you insured and certified, and can we schedule next Thursday morning? Please send a deposit payment link, but do not take card details by voice. There may be pets at the property.'
+      },
+      hvac_no_cold_air_dispatch: {
+        label: 'HVAC no-cold-air booking',
+        short_label: 'HVAC',
+        caller: 'Morgan Homeowner',
+        zip: '46205',
+        source: 'PPC',
+        vertical: 'HVAC',
+        revenue: 850,
+        margin: 0.48,
+        progress: 'hvac',
+        intent: 'AC is blowing air but not cold; caller moves from dispatch to scheduled appointment.',
+        should_do: 'Book a cooling diagnostic and preserve trust questions for the technician.',
+        proves: 'CallShield can recover dispatch intent while capturing licensed, employee, stocked truck, marble floor, and pet notes.',
+        value: '$408 recovered gross profit',
+        message: 'My AC is blowing air but it is not cold. I was hoping for dispatch today, but I can schedule an appointment. Are your technicians licensed and insured, are they employees or contractors, do the vans carry parts, can they protect marble floors, and will the technician text before arrival? I have dogs in the home.'
+      },
+      hvac_trust_objections_same_day: {
+        label: 'HVAC trust-objection path',
+        short_label: 'HVAC trust',
+        caller: 'Riley Homeowner',
+        zip: '46240',
+        source: 'After hours',
+        vertical: 'HVAC',
+        revenue: 950,
+        margin: 0.48,
+        progress: 'hvac',
+        intent: 'Same-day cooling call with many credibility and price objections.',
+        should_do: 'Book the same-day appointment while preserving trust objections and technician call-ahead notes.',
+        proves: 'HVAC is the next vertical because trust questions can make paid calls leak before booking.',
+        value: '$456 recovered gross profit',
+        message: 'The AC is blowing but not cold and I need same day HVAC service. How long have you been in business, are you licensed and insured, are techs employees, is the assessment free, do you offer replacement unit manufacturer options, do you handle commercial HVAC, are trucks stocked, can you protect marble floors, and do you have strong Google reviews and a BBB rating?'
+      },
+      safety_escalation_gas_or_co: {
+        label: 'Safety escalation',
+        short_label: 'Safety',
+        caller: 'Casey Safety',
+        zip: '46220',
+        source: 'Organic',
+        vertical: 'home services',
+        revenue: 0,
+        margin: 0.52,
+        progress: 'safety',
+        intent: 'Caller mentions gas smell or carbon monoxide during intake.',
+        should_do: 'Escalate to a human before booking, spam, future-module, wrong-service, or out-of-area logic.',
+        proves: 'Deterministic safety guardrails stay ahead of revenue recovery.',
+        value: 'Risk prevented',
+        message: 'The AC is not cooling and I smell gas near the furnace. The carbon monoxide alarm may also be going off.'
+      },
+      wrong_service: {
+        label: 'Wrong service',
+        short_label: 'Wrong service',
+        caller: 'Avery Wrong Service',
+        zip: '46220',
+        source: 'PPC',
+        vertical: 'home inspection',
+        revenue: 0,
+        margin: 0.52,
+        intent: 'Caller asks for work outside the configured service set.',
+        should_do: 'Reject as wrong-service waste and tighten campaign targeting.',
+        proves: 'The ledger explains paid-lead waste instead of hiding it in call volume.',
+        value: 'Waste classified',
+        message: 'Can you do mold remediation and repair work after water damage?'
+      },
+      out_of_area: {
+        label: 'Out of area',
+        short_label: 'Out of area',
+        caller: 'Jordan Outside Area',
+        zip: '47906',
+        source: 'Google Ads',
+        vertical: 'home inspection',
+        revenue: 0,
+        margin: 0.52,
+        intent: 'Valid service request from outside configured ZIP codes.',
+        should_do: 'Reject as out-of-area waste without lead resale.',
+        proves: 'Geography targeting waste becomes visible.',
+        value: 'Budget leakage shown',
+        message: 'I need a home inspection this Friday.'
+      },
+      vendor_spam: {
+        label: 'Vendor/spam',
+        short_label: 'Vendor',
+        caller: 'Vendor Caller',
+        zip: '46220',
+        source: 'Cold vendor',
+        vertical: 'home services',
+        revenue: 0,
+        margin: 0.52,
+        intent: 'Solicitor tries to sell marketing or merchant services.',
+        should_do: 'Suppress as vendor/spam and protect staff time.',
+        proves: 'Non-customer calls are separated from real lead performance.',
+        value: 'Staff time protected',
+        message: 'Our SEO marketing agency can sell you more leads and merchant services.'
+      },
+      existing_customer_feedback_future_module: {
+        label: 'Existing-customer feedback future module',
+        short_label: 'Future module',
+        caller: 'Existing Customer',
+        zip: '46220',
+        source: 'Existing customer',
+        vertical: 'future module',
+        revenue: 0,
+        margin: 0.52,
+        intent: 'Existing customer wants to share product feedback.',
+        should_do: 'Mark as future existing-customer feedback, review, or reorder module only.',
+        proves: 'Feedback capture is separate from core inbound paid-lead intake and is not cold calling.',
+        value: 'Future add-on only',
+        message: 'I am an existing customer. The larger size would fit better, the product was warm, and it meant a lot to my family. I can share feedback, maybe leave a review, and use a reorder discount later.'
+      }
+    };
+    let phoneLedger = [];
+    let phoneEventId = 1;
+    const byId = id => document.getElementById(id);
+
+    document.querySelectorAll('[role="tab"]').forEach(tab => {
+      tab.addEventListener('click', () => showTab(tab.dataset.tab, true));
+      tab.addEventListener('keydown', handleTabKeydown);
+    });
+
+    function renderScenarioButtons() {
+      const order = ['home_inspection_buyer_fast_schedule', 'hvac_no_cold_air_dispatch', 'hvac_trust_objections_same_day', 'safety_escalation_gas_or_co', 'wrong_service', 'out_of_area', 'vendor_spam', 'existing_customer_feedback_future_module'];
+      byId('scenarioButtons').innerHTML = order.map(id => {
+        const s = SCENARIOS[id];
+        return `<article class="scenario-card">
+          <h3>${escapeHtml(s.label)}</h3>
+          <p><strong>Caller intent:</strong> ${escapeHtml(s.intent)}</p>
+          <p><strong>What CallShield should do:</strong> ${escapeHtml(s.should_do)}</p>
+          <p><strong>What this proves:</strong> ${escapeHtml(s.proves)}</p>
+          <p><strong>Value:</strong> ${escapeHtml(s.value)}</p>
+          <button class="primary" type="button" onclick="scenario('${id}', true)">Run this call</button>
+        </article>`;
+      }).join('');
+    }
+
+    function showTab(tabId, focusTab = false) {
+      document.querySelectorAll('[role="tab"]').forEach(tab => {
+        const active = tab.dataset.tab === tabId;
+        tab.setAttribute('aria-selected', active ? 'true' : 'false');
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus({preventScroll:true});
+      });
+      document.querySelectorAll('[role="tabpanel"]').forEach(panel => {
+        panel.hidden = panel.id !== tabId;
+      });
+      if (tabId === 'ledger') {
+        markProgress('ledger');
+        renderPhoneDashboard();
+      }
+      if (tabId === 'model') {
+        markProgress('roi');
+        if (focusTab) showPhoneReport(false);
+      }
+      const nav = document.querySelector('.sticky-nav');
+      const target = byId(tabId);
+      const top = target.getBoundingClientRect().top + window.scrollY - (nav ? nav.offsetHeight : 0);
+      window.scrollTo({top: Math.max(0, top), behavior:'auto'});
+    }
+
+    function handleTabKeydown(event) {
+      const keys = ['ArrowRight', 'ArrowLeft', 'Home', 'End'];
+      if (!keys.includes(event.key)) return;
+      event.preventDefault();
+      const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+      const index = tabs.indexOf(event.currentTarget);
+      let nextIndex = index;
+      if (event.key === 'ArrowRight') nextIndex = (index + 1) % tabs.length;
+      if (event.key === 'ArrowLeft') nextIndex = (index - 1 + tabs.length) % tabs.length;
+      if (event.key === 'Home') nextIndex = 0;
+      if (event.key === 'End') nextIndex = tabs.length - 1;
+      showTab(tabs[nextIndex].dataset.tab, true);
+    }
+
+    function splitList(value) {
+      return String(value || '').split(',').map(s => s.trim()).filter(Boolean);
+    }
+
+    function money(n) {
+      return '$' + Math.round(Number(n) || 0).toLocaleString();
+    }
+
+    function formatStatus(status) {
+      const labels = {
+        booked_lead: 'Booked lead',
+        human_required: 'Human required',
+        wrong_service_or_unclear: 'Wrong service',
+        out_of_area: 'Out of area',
+        spam_or_vendor: 'Vendor/spam',
+        future_module: 'Future module'
+      };
+      return labels[status] || String(status || '');
+    }
+
+    function statusBadgeClass(status) {
+      if (status === 'booked_lead') return 'badge booked';
+      if (status === 'human_required') return 'badge human';
+      if (status === 'future_module') return 'badge future';
+      if (status === 'wrong_service_or_unclear' || status === 'out_of_area' || status === 'spam_or_vendor') return 'badge bad';
+      return 'badge waste';
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[ch]));
+    }
+
+    function calc() {
+      try {
+        const b = Number(byId('bookings').value) || 0;
+        const t = Number(byId('ticket').value) || 0;
+        const m = Number(byId('margin').value) || 0;
+        const f = Number(byId('fee').value) || 0;
+        const s = Number(byId('setup').value) || 0;
+        const revenue = b * t;
+        const gross = revenue * m;
+        const net = gross - f;
+        byId('rev').textContent = money(revenue);
+        byId('gp').textContent = money(gross);
+        byId('roi').textContent = f > 0 ? (gross / f).toFixed(1) + 'x' : '0x';
+        byId('payback').textContent = net > 0 ? (s / net).toFixed(1) + ' months' : 'No payback';
+      } catch (err) {
+        setLiveStatus('ROI calculation could not be completed.');
+      }
+    }
+
+    function scenario(id, autoRun = false) {
+      const sample = SCENARIOS[id];
+      if (!sample) return;
+      byId('callerName').value = sample.caller;
+      byId('zip').value = sample.zip;
+      byId('source').value = sample.source;
+      byId('message').value = sample.message;
+      showTab('demo');
+      if (autoRun) submitIntake(id);
+    }
+
+    function submitIntake(scenarioId = '') {
+      try {
+        const payload = {
+          caller_name: byId('callerName').value,
+          zip: byId('zip').value,
+          source: byId('source').value,
+          message: byId('message').value,
+          scenario_id: scenarioId
+        };
+        const result = classifyPhoneIntake(payload);
+        const event = addPhoneEvent(payload, result);
+        if (SCENARIOS[scenarioId]?.progress) markProgress(SCENARIOS[scenarioId].progress);
+        byId('verdictArea').innerHTML = verdictCard(event);
+        byId('intakeResult').textContent = JSON.stringify({static_phone_demo:true, event_id:event.id, ...result}, null, 2);
+        renderPhoneDashboard();
+        setLiveStatus(`${formatStatus(result.status)}: ${result.next_step}`);
+      } catch (err) {
+        byId('verdictArea').innerHTML = `<div class="verdict-card bad"><h3>Could not classify this intake.</h3><p>Try another scenario or reload the static demo.</p></div>`;
+        setLiveStatus('Could not classify this intake.');
+      }
+    }
+
+    function seedPhoneDemo(activate) {
+      try {
+        phoneLedger = [];
+        phoneEventId = 1;
+        Object.keys(SCENARIOS).forEach(id => {
+          const data = SCENARIOS[id];
+          const payload = {caller_name: data.caller, zip: data.zip, source: data.source, message: data.message, scenario_id: id};
+          addPhoneEvent(payload, classifyPhoneIntake(payload));
+        });
+        renderPhoneDashboard();
+        markProgress('seed');
+        byId('seedSuccess').hidden = false;
+        byId('intakeResult').textContent = 'Static phone demo seeded. Next: tap Live Demo and try Home inspection or HVAC.';
+        byId('verdictArea').innerHTML = '';
+        byId('mobileCta').textContent = 'Next: Try scenarios';
+        byId('mobileCta').setAttribute('data-next', 'demo');
+        setLiveStatus('Demo seeded. Next: tap Live Demo and try Home inspection or HVAC.');
+        if (activate) showTab('start');
+      } catch (err) {
+        setLiveStatus('Demo seed failed. Reload the page and try again.');
+      }
+    }
+
+    function classifyPhoneIntake(payload) {
+      const text = [payload.message, payload.transcript, payload.service, payload.notes, payload.caller_intent].filter(Boolean).join(' ').toLowerCase();
+      const data = SCENARIOS[payload.scenario_id] || {};
+      const margin = Number(data.margin || DEMO_CONFIG.gross_margin);
+      const revenue = Number(data.revenue || DEMO_CONFIG.avg_ticket);
+      if (containsAny(text, SAFETY_TERMS)) {
+        return phoneResult('human_required', 'Safety, regulated, upset caller, or human request detected.', false, 0, margin, 0.98, {
+          category:'human_required_safety',
+          why:'Safety and regulated language must be handled by a person before any booking or waste logic.',
+          value:'Protects the caller, the customer, and the pilot.',
+          safety_note:'Escalate immediately. Do not provide legal advice, medical triage, rehab counseling, or emergency troubleshooting.'
+        });
+      }
+      if (containsAny(text, SPAM_TERMS)) {
+        return phoneResult('spam_or_vendor', 'Likely vendor, spam, or resale solicitation.', false, 0, margin, 0.95, {
+          category:'spam_or_vendor',
+          why:'This is not a customer lead.',
+          value:'Protects staff time and separates vendor noise from paid-lead performance.'
+        });
+      }
+      if (isExistingCustomerFeedback(text) || payload.scenario_id === 'existing_customer_feedback_future_module') {
+        return phoneResult('future_module', 'Existing-customer feedback capture is a future add-on only, not core paid-lead intake.', false, 0, margin, 0.91, {
+          category:'future_module_not_core_inbound_intake',
+          why:'Feedback capture can be valuable, but it should not be mixed with the paid-lead intake ledger.',
+          value:'Keeps the wedge focused on inbound paid-lead recovery.',
+          safety_note:'Use only for opted-in existing-customer follow-up. This is not outbound cold calling.'
+        });
+      }
+      if (payload.zip && !DEMO_CONFIG.service_zips.includes(String(payload.zip))) {
+        return phoneResult('out_of_area', `ZIP ${payload.zip} is outside the configured service area.`, false, 0, margin, 0.94, {
+          category:'out_of_area',
+          why:'The service request may be real, but the customer cannot serve that geography.',
+          value:'Shows geography targeting waste in paid-call sources.'
+        });
+      }
+      if (containsAny(text, DEMO_CONFIG.wrong_service_terms)) {
+        return phoneResult('wrong_service_or_unclear', 'Request does not match configured home inspection or HVAC pilot services.', false, 0, margin, 0.92, {
+          category:'wrong_service',
+          why:'The caller wants a service the pilot customer does not perform.',
+          value:'Shows campaign or source mismatch without reselling the lead.'
+        });
+      }
+      const hasService = DEMO_CONFIG.services.some(service => text.includes(service));
+      if (!hasService && text.trim().length < 18) {
+        return phoneResult('wrong_service_or_unclear', 'Not enough service detail to book deterministically.', false, 0, margin, 0.72, {
+          category:'unclear_service',
+          why:'The demo cannot safely infer a booking from sparse details.',
+          value:'Routes low-detail calls away from false bookings.'
+        });
+      }
+      if (hasService || containsAny(text, DEMO_CONFIG.keywords)) {
+        return phoneResult('booked_lead', 'Qualified paid lead can be booked or recovered. Intake notes captured trust questions, pets, access, floor protection, report timing, or deposit-link language without collecting raw card data.', true, revenue, margin, 0.9, {
+          category:'recovered_booking',
+          why:'The caller has a service need in the configured area.',
+          value:`Adds ${money(revenue * margin)} estimated recovered gross profit to the ledger.`
+        });
+      }
+      return phoneResult('human_required', 'Low confidence intake should be reviewed by a person.', false, 0, margin, 0.62, {
+        category:'human_required_low_confidence',
+        why:'Low confidence should not be converted into a false booking.',
+        value:'Preserves trust and protects deterministic guardrails.',
+        safety_note:'Escalate to a human when confidence is low.'
+      });
+    }
+
+    function phoneResult(status, reason, booked, revenue, margin, confidence, meta = {}) {
+      const grossProfit = Number((revenue * margin).toFixed(2));
+      const nextSteps = {
+        booked_lead: 'Confirm appointment window, send booking details, and preserve trust-objection notes for the technician or inspector.',
+        human_required: 'Escalate immediately to the configured human contact.',
+        out_of_area: 'Mark as paid-lead waste and tune geography filters without lead resale.',
+        wrong_service_or_unclear: 'Mark as wrong-service waste and tighten source or campaign targeting.',
+        spam_or_vendor: 'Suppress vendor/spam source and protect staff time.',
+        future_module: 'Keep as future existing-customer feedback, review, or reorder recovery module only.'
+      };
+      return {
+        status,
+        reason,
+        booked,
+        estimated_revenue: revenue,
+        estimated_gross_profit: grossProfit,
+        gross_margin: margin,
+        confidence,
+        next_step: nextSteps[status],
+        lead_waste_category: meta.category || status,
+        why_it_matters: meta.why || 'This classification keeps the owner focused on paid-lead outcomes.',
+        business_value: meta.value || 'Creates a clear ledger row for review.',
+        safety_note: meta.safety_note || '',
+        ledger_impact: booked ? 'Adds recovered revenue and gross profit.' : 'Adds a non-booked ledger row with reason and next action.'
+      };
+    }
+
+    function addPhoneEvent(payload, result) {
+      const event = {
+        id: phoneEventId++,
+        created_at: new Date().toISOString(),
+        caller_name: payload.caller_name || '',
+        phone: '555-0100',
+        zip: payload.zip || '',
+        source: payload.source || 'static_demo',
+        scenario_id: payload.scenario_id || '',
+        ...result
+      };
+      phoneLedger.unshift(event);
+      return event;
+    }
+
+    function verdictCard(event) {
+      const severity = event.status === 'human_required' ? 'human' : (event.status === 'future_module' ? 'future' : (event.booked ? '' : 'bad'));
+      return `<div class="verdict-card ${severity}">
+        <div class="status-row"><span class="${statusBadgeClass(event.status)}">${escapeHtml(formatStatus(event.status))}</span><span class="pill">Confidence ${Math.round(event.confidence * 100)}%</span></div>
+        <h3>${escapeHtml(event.caller_name || 'Demo caller')}</h3>
+        <div class="verdict-grid">
+          <div><p class="mini-label">Why it matters</p><p>${escapeHtml(event.why_it_matters)}</p></div>
+          <div><p class="mini-label">Business value</p><p>${escapeHtml(event.business_value)}</p></div>
+          <div><p class="mini-label">Next action</p><p>${escapeHtml(event.next_step)}</p></div>
+          <div><p class="mini-label">Ledger impact</p><p>${escapeHtml(event.ledger_impact)}</p></div>
+        </div>
+        ${event.safety_note ? `<p class="callout warn"><strong>Safety note:</strong> ${escapeHtml(event.safety_note)}</p>` : ''}
+      </div>`;
+    }
+
+    function phoneRoi() {
+      const bookings = phoneLedger.filter(event => event.status === 'booked_lead').length;
+      const human = phoneLedger.filter(event => event.status === 'human_required').length;
+      const future = phoneLedger.filter(event => event.status === 'future_module').length;
+      const waste = phoneLedger.filter(event => ['wrong_service_or_unclear', 'out_of_area', 'spam_or_vendor'].includes(event.status)).length;
+      const recoveredRevenue = phoneLedger.reduce((sum, event) => sum + Number(event.estimated_revenue || 0), 0);
+      const recoveredGrossProfit = phoneLedger.reduce((sum, event) => sum + Number(event.estimated_gross_profit || 0), 0);
+      return {
+        events: phoneLedger.length,
+        bookings,
+        human,
+        waste,
+        future,
+        booking_rate: phoneLedger.length ? bookings / phoneLedger.length : 0,
+        recovered_revenue: recoveredRevenue,
+        recovered_gross_profit: recoveredGrossProfit,
+        roi_multiple: recoveredGrossProfit / DEMO_CONFIG.monthly_fee
+      };
+    }
+
+    function showPhoneDashboard() {
+      seedPhoneDemoIfEmpty();
+      markProgress('ledger');
+      showTab('ledger');
+    }
+
+    function renderPhoneDashboard() {
+      seedPhoneDemoIfEmpty();
+      const roi = phoneRoi();
+      byId('phoneDashboard').innerHTML = `<div class="panel">
+        <h3>Static Demo Lead Waste Ledger</h3>
+        <div class="summary-strip">
+          <div class="summary-tile"><p class="mini-label">Total calls</p><strong class="metric">${roi.events}</strong></div>
+          <div class="summary-tile"><p class="mini-label">Booked calls</p><strong class="metric">${roi.bookings}</strong></div>
+          <div class="summary-tile"><p class="mini-label">Human escalations</p><strong class="metric">${roi.human}</strong></div>
+          <div class="summary-tile"><p class="mini-label">Waste calls</p><strong class="metric">${roi.waste}</strong></div>
+          <div class="summary-tile"><p class="mini-label">Future-module calls</p><strong class="metric">${roi.future}</strong></div>
+          <div class="summary-tile"><p class="mini-label">Estimated gross profit</p><strong class="metric">${money(roi.recovered_gross_profit)}</strong></div>
+          <div class="summary-tile"><p class="mini-label">ROI multiple</p><strong class="metric">${roi.roi_multiple.toFixed(1)}x</strong></div>
+        </div>
+        ${phoneEventMarkup(phoneLedger)}
+      </div>`;
+    }
+
+    function showPhoneReport(switchTab = true) {
+      seedPhoneDemoIfEmpty();
+      markProgress('roi');
+      if (switchTab) {
+        showTab('model');
+        return;
+      }
+      const roi = phoneRoi();
+      const decision = roi.roi_multiple >= 1 ? 'GO for pilot review' : 'Needs more recovered calls to cover the monthly fee';
+      byId('phoneReport').innerHTML = `<div class="panel">
+        <h3>ROI report</h3>
+        <p>Customer-facing summary of paid-lead recovery, waste classification, safety escalation, and ROI.</p>
+        <div class="summary-strip">
+          <div class="summary-tile"><p class="mini-label">Total calls</p><strong class="metric">${roi.events}</strong></div>
+          <div class="summary-tile"><p class="mini-label">Booked leads</p><strong class="metric">${roi.bookings}</strong></div>
+          <div class="summary-tile"><p class="mini-label">Estimated revenue</p><strong class="metric">${money(roi.recovered_revenue)}</strong></div>
+          <div class="summary-tile"><p class="mini-label">Estimated gross profit</p><strong class="metric">${money(roi.recovered_gross_profit)}</strong></div>
+          <div class="summary-tile"><p class="mini-label">ROI multiple</p><strong class="metric">${roi.roi_multiple.toFixed(1)}x</strong></div>
+        </div>
+        <p class="callout"><strong>${decision}.</strong> Start with home inspection, then test HVAC because trust objections and dispatch leakage are visible in the transcript patterns.</p>
+      </div>`;
+    }
+
+    function phoneEventMarkup(events) {
+      return `<div class="event-list">${events.map(event => `<div class="event-card">
+        <div class="event-card-top"><strong>${escapeHtml(event.caller_name)}</strong><span class="${statusBadgeClass(event.status)} event-status">${escapeHtml(formatStatus(event.status))}</span></div>
+        <p><strong>Scenario:</strong> ${escapeHtml(event.scenario_id || 'custom')}</p>
+        <p><strong>Gross profit:</strong> ${money(event.estimated_gross_profit)}</p>
+        <p><strong>Reason:</strong> ${escapeHtml(event.reason)}</p>
+        <p><strong>Next step:</strong> ${escapeHtml(event.next_step)}</p>
+        <p><strong>Lead-waste category:</strong> ${escapeHtml(event.lead_waste_category)}</p>
+      </div>`).join('')}</div>`;
+    }
+
+    function currentCsv() {
+      seedPhoneDemoIfEmpty();
+      const header = 'id,created_at,caller_name,phone,zip,source,scenario_id,status,lead_waste_category,reason,estimated_revenue,estimated_gross_profit,next_step';
+      const lines = phoneLedger.map(event => [event.id, event.created_at, event.caller_name, event.phone, event.zip, event.source, event.scenario_id, event.status, event.lead_waste_category, event.reason, event.estimated_revenue, event.estimated_gross_profit, event.next_step].map(csvCell).join(','));
+      return [header, ...lines].join('\n');
+    }
+
+    function downloadPhoneCsv() {
+      try {
+        const csv = currentCsv();
+        const blob = new Blob([csv], {type:'text/csv'});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'callshield_public_demo_ledger.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+        markProgress('csv');
+        byId('csvStatus').textContent = 'CSV export started. If your phone blocks downloads, tap View CSV or Copy CSV.';
+      } catch (err) {
+        byId('csvStatus').textContent = 'CSV download was blocked. Use View CSV or Copy CSV.';
+        viewPhoneCsv();
+      }
+    }
+
+    function viewPhoneCsv() {
+      try {
+        byId('csvOutput').textContent = currentCsv();
+        byId('csvBox').hidden = false;
+        markProgress('csv');
+        byId('csvStatus').textContent = 'CSV is visible below and has not left the browser.';
+      } catch (err) {
+        byId('csvStatus').textContent = 'Could not render CSV.';
+      }
+    }
+
+    function copyPhoneCsv() {
+      copyText(currentCsv(), byId('csvStatus'), 'CSV copied. It has not been uploaded anywhere.', 'CSV copy failed. Use View CSV and select the text.').then(ok => {
+        if (ok) markProgress('csv');
+      });
+    }
+
+    function showPhoneIntegrations() {
+      byId('phoneIntegrations').textContent = JSON.stringify({
+        mode:'public_static_demo',
+        live_phone_required:false,
+        paid_dependencies_required:false,
+        external_api_calls:false,
+        candidates: PHONE_INTEGRATIONS.map(provider => ({provider, optional:true, local_status:'not installed'}))
+      }, null, 2);
+    }
+
+    function makeConfig() {
+      try {
+        const numericFields = [
+          { id: 'wTicket', label: 'Average job revenue' },
+          { id: 'wMargin', label: 'Gross margin' },
+          { id: 'wMonthly', label: 'Monthly fee' },
+          { id: 'wSetup', label: 'Setup fee' }
+        ];
+        const nums = {};
+        for (const { id, label } of numericFields) {
+          const val = Number(byId(id).value);
+          if (!Number.isFinite(val)) {
+            byId('configOut').textContent = `"${label}" must be a valid number. Please correct it and try again.`;
+            return;
+          }
+          nums[id] = val;
+        }
+        const avgTicket = nums['wTicket'];
+        const cfg = {
+          customer_name: byId('wName').value.trim(),
+          business_name: byId('wName').value.trim(),
+          vertical: byId('wVertical').value,
+          service_zips: splitList(byId('wZips').value),
+          services: splitList(byId('wServices').value),
+          wrong_service_terms: splitList(byId('wWrongServices').value),
+          keywords: splitList(byId('wKeywords').value),
+          avg_ticket: avgTicket,
+          gross_margin: nums['wMargin'],
+          pricing: {
+            average_job_revenue: avgTicket,
+            monthly_fee: nums['wMonthly'],
+            setup_fee: nums['wSetup']
+          },
+          appointment_slots: splitList(byId('wSlots').value),
+          risk_escalation_rules: {
+            human_review_required: true,
+            escalate_on: splitList(byId('wRisks').value)
+          }
+        };
+        const json = JSON.stringify(cfg, null, 2);
+        JSON.parse(json);
+        byId('configOut').textContent = json;
+      } catch (err) {
+        byId('configOut').textContent = 'Config could not be generated. Check all fields and try again.';
+      }
+    }
+
+    function seedPhoneDemoIfEmpty() {
+      if (!phoneLedger.length) seedPhoneDemo(false);
+    }
+
+    function containsAny(text, terms) {
+      return terms.some(term => text.includes(term));
+    }
+
+    function isExistingCustomerFeedback(text) {
+      return containsAny(text, ['existing customer', 'customer feedback', 'product feedback', 'discount code']) && containsAny(text, ['feedback', 'review', 'reorder', 'sizing', 'warmth', 'discount']);
+    }
+
+    function hasHorizontalOverflow() {
+      return document.documentElement.scrollWidth > window.innerWidth + 1;
+    }
+
+    function csvCell(value) {
+      const text = String(value ?? '');
+      return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    }
+
+    function hostedDemoUrl() {
+      return window.location.protocol.startsWith('http') ? window.location.href : 'the hosted URL for this page';
+    }
+
+    function handoffText() {
+      return `Seth, here is the CallShield phone demo:
+
+OPEN THIS LINK:
+${hostedDemoUrl()}
+
+Tap Start, then Run phone demo seed. Try Home inspection, HVAC, Safety, Wrong service, Out of area, and Vendor. Then tap Ledger and ROI.
+
+This is a static phone demo, not live phone service. It shows how CallShield classifies paid-lead intake, escalates safety risk to a human, separates lead waste, and proves recovered gross profit with a Lead Waste Ledger.`;
+    }
+
+    function updateHandoffText() {
+      byId('textMessage').textContent = handoffText();
+    }
+
+    function copyTextMessage() {
+      copyText(handoffText(), byId('copyStatus'), 'Copied. Paste this into a text message to Seth.', 'Copy failed. Select the text above and copy it manually.').then(ok => {
+        if (ok) markProgress('text');
+      });
+    }
+
+    async function shareDemo() {
+      const text = handoffText();
+      const status = byId('copyStatus');
+      try {
+        if (navigator.share && window.location.protocol.startsWith('http')) {
+          await navigator.share({title:'CallShield phone demo', text, url:window.location.href});
+          status.textContent = 'Share sheet opened for this hosted demo.';
+          markProgress('text');
+        } else {
+          const ok = await copyText(text, status, 'Share is not available here, so the text was copied.', 'Share is not available and copy failed. Select the text above manually.');
+          if (ok) markProgress('text');
+        }
+      } catch (err) {
+        const ok = await copyText(text, status, 'Share was canceled or unavailable, so the text was copied.', 'Share failed. Select the text above manually.');
+        if (ok) markProgress('text');
+      }
+    }
+
+    async function copyText(text, statusNode, successMessage, failMessage) {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          statusNode.textContent = successMessage;
+          setLiveStatus(successMessage);
+          return true;
+        }
+      } catch (err) {
+        // Fall through to the local textarea copy path.
+      }
+      return fallbackCopy(text, statusNode, successMessage, failMessage);
+    }
+
+    function fallbackCopy(text, statusNode, successMessage, failMessage) {
+      const box = document.createElement('textarea');
+      box.value = text;
+      box.setAttribute('readonly', '');
+      box.style.position = 'fixed';
+      box.style.left = '-9999px';
+      document.body.appendChild(box);
+      box.select();
+      try {
+        const ok = document.execCommand('copy');
+        statusNode.textContent = ok ? successMessage : failMessage;
+        setLiveStatus(statusNode.textContent);
+        return ok;
+      } catch (err) {
+        statusNode.textContent = failMessage;
+        setLiveStatus(failMessage);
+        return false;
+      } finally {
+        document.body.removeChild(box);
+      }
+    }
+
+    function markProgress(step) {
+      if (!Object.hasOwn(progress, step)) return;
+      progress[step] = true;
+      renderProgress();
+    }
+
+    function renderProgress() {
+      byId('progressGrid').innerHTML = Object.entries(PROGRESS_LABELS).map(([key, label]) => `<div class="progress-item ${progress[key] ? 'done' : ''}">${progress[key] ? 'Done: ' : 'Next: '}${escapeHtml(label)}</div>`).join('');
+      document.querySelectorAll('[data-progress-step]').forEach(item => item.classList.toggle('done', Boolean(progress[item.dataset.progressStep])));
+    }
+
+    function setLiveStatus(message) {
+      byId('globalStatus').textContent = message;
+    }
+
+    function mobileCtaAction() {
+      if (byId('mobileCta').getAttribute('data-next') === 'demo') showTab('demo');
+      else seedPhoneDemo(true);
+    }
+
+    renderScenarioButtons();
+    renderProgress();
+    calc();
+    makeConfig();
+    updateHandoffText();
+    renderPhoneDashboard();
+  </script>
+</body>
+</html>

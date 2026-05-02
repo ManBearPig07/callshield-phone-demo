@@ -25,11 +25,13 @@ The important rule is to upload only this folder, not the private repo.
 
 ## What link to text Seth
 
-After hosting, copy the public HTTPS URL for `index.html` and paste it into `docs/TEXT_MESSAGE_TO_SETH.md` where it says:
+The hosted phone-demo link is:
 
 ```text
-[paste public hosted demo link]
+https://manbearpig07.github.io/callshield-phone-demo/
 ```
+
+This link is served from a separate public GitHub Pages repository containing only the static demo files. The private product repo remains private.
 
 ## How Seth runs it on his phone
 

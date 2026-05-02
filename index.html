@@ -879,7 +879,6 @@
       markProgress('roi');
       if (switchTab) {
         showTab('model');
-        return;
       }
       const roi = phoneRoi();
       const decision = roi.roi_multiple >= 1 ? 'GO for pilot review' : 'Needs more recovered calls to cover the monthly fee';

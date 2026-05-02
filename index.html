@@ -554,7 +554,7 @@
           <p><strong>What CallShield should do:</strong> ${escapeHtml(s.should_do)}</p>
           <p><strong>What this proves:</strong> ${escapeHtml(s.proves)}</p>
           <p><strong>Value:</strong> ${escapeHtml(s.value)}</p>
-          <button class="primary" type="button" onclick="scenario('${id}', true)">Run this call</button>
+          <button class="primary" type="button" onclick="runScenario('${id}')">Run this call</button>
         </article>`;
       }).join('');
     }
@@ -657,6 +657,10 @@
       byId('message').value = sample.message;
       showTab('demo');
       if (autoRun) submitIntake(id);
+    }
+
+    function runScenario(id) {
+      scenario(id, true);
     }
 
     function submitIntake(scenarioId = '') {

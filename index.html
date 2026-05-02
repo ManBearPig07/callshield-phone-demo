@@ -162,6 +162,7 @@
         <span>Seed the demo, run Home inspection, run HVAC, trigger Safety escalation, then open Ledger, ROI, and copy the text to Seth.</span>
         <div class="actions stack">
           <button class="primary" type="button" onclick="seedPhoneDemo(true)">Run phone demo seed</button>
+          <button class="secondary" type="button" onclick="showTab('tutorial')">Open walkthrough</button>
           <button class="secondary" type="button" onclick="showTab('demo')">Next: Try scenarios</button>
         </div>
       </div>
@@ -172,6 +173,7 @@
     <div class="shell">
       <div class="tabs" role="tablist" aria-label="CallShield public demo sections">
         <button id="tab-start" role="tab" aria-selected="true" aria-controls="start" tabindex="0" data-tab="start">Start</button>
+        <button id="tab-tutorial" role="tab" aria-selected="false" aria-controls="tutorial" tabindex="-1" data-tab="tutorial">Walkthrough</button>
         <button id="tab-demo" role="tab" aria-selected="false" aria-controls="demo" tabindex="-1" data-tab="demo">Live Demo</button>
         <button id="tab-ledger" role="tab" aria-selected="false" aria-controls="ledger" tabindex="-1" data-tab="ledger">Ledger</button>
         <button id="tab-model" role="tab" aria-selected="false" aria-controls="model" tabindex="-1" data-tab="model">ROI</button>
@@ -223,7 +225,64 @@
       <div class="callout">Lead Waste Ledger value: CallShield separates recoverable bookings from paid-lead waste and human-risk calls, so the owner can see what the ad spend actually produced.</div>
       <div class="actions">
         <button class="primary" type="button" onclick="seedPhoneDemo(true)">Run phone demo seed</button>
+        <button class="secondary" type="button" onclick="showTab('tutorial')">Open walkthrough</button>
         <button class="secondary" type="button" onclick="showTab('demo')">Try Live Demo</button>
+      </div>
+    </section>
+
+    <section id="tutorial" class="tab" role="tabpanel" aria-labelledby="tab-tutorial" hidden>
+      <h2>Click-by-click walkthrough</h2>
+      <p class="lead">Use this path if Seth has no prior context. It explains what CallShield is, what each tab proves, and how to move from the public phone demo to the full-stack package.</p>
+
+      <div class="callout"><strong>What CallShield is:</strong> a Paid-Lead Intake Recovery OS. It classifies paid inbound calls, books qualified jobs, escalates safety or regulated risk to a human, separates lead waste, and proves recovered gross profit.</div>
+
+      <div class="grid">
+        <div class="card"><h3>1. Start with the problem</h3><p>Paid calls can leak into missed bookings, out-of-area calls, wrong-service requests, vendor spam, or human-risk calls. CallShield turns each call into a clear business outcome.</p></div>
+        <div class="card"><h3>2. Why this is not an AI receptionist</h3><p>A receptionist answers. CallShield proves what the ad spend produced: booked lead, human required, wrong service, out of area, vendor/spam, or future module.</p></div>
+        <div class="card"><h3>3. What to tap first</h3><p>Tap <strong>Run seed now</strong>. That loads realistic home inspection, HVAC, safety, waste, and future-module rows entirely inside this browser.</p></div>
+        <div class="card"><h3>4. What the demo handles</h3><p>Home inspection buyer booking, HVAC no-cold-air booking, HVAC trust objections, safety escalation, wrong service, out of area, vendor/spam, and existing-customer feedback as a future module.</p></div>
+      </div>
+
+      <div class="panel soft" style="margin-top:14px">
+        <h3>90-second product walkthrough</h3>
+        <ol class="path-list">
+          <li class="path-step"><span class="path-num">1</span><span><strong>Tap Run seed now.</strong> The demo creates a local in-browser Lead Waste Ledger. No customer data leaves the phone.</span></li>
+          <li class="path-step"><span class="path-num">2</span><span><strong>Tap Try Home inspection.</strong> Seth sees a buyer call become a booked lead with report, timing, access, pets, insurance, certification, and deposit-link notes captured without card details.</span></li>
+          <li class="path-step"><span class="path-num">3</span><span><strong>Tap Try HVAC.</strong> Seth sees no-cold-air intent plus trust objections: licensed and insured, employee versus contractor, stocked trucks, marble floor protection, dogs, and call-ahead expectations.</span></li>
+          <li class="path-step"><span class="path-num">4</span><span><strong>Tap Trigger Safety.</strong> Gas, carbon monoxide, electrical burning, active flooding, fire, legal, medical, rehab, angry, low-confidence, or human-request language escalates before any booking or waste logic.</span></li>
+          <li class="path-step"><span class="path-num">5</span><span><strong>Tap Open Ledger.</strong> The owner sees total calls, booked calls, human escalations, waste calls, future-module calls, estimated gross profit, ROI multiple, reason, next step, and lead-waste category.</span></li>
+          <li class="path-step"><span class="path-num">6</span><span><strong>Tap Open ROI.</strong> Seth sees recovered revenue, recovered gross profit, ROI multiple, setup-fee payback, and the pilot decision rule.</span></li>
+          <li class="path-step"><span class="path-num">7</span><span><strong>Tap Copy/share text.</strong> Gary can send Seth the hosted URL. The copied message uses this page address automatically.</span></li>
+        </ol>
+        <div class="actions">
+          <button class="primary" type="button" onclick="seedPhoneDemo(true)">Run seed now</button>
+          <button class="secondary" type="button" onclick="runScenario('home_inspection_buyer_fast_schedule')">Try Home inspection</button>
+          <button class="secondary" type="button" onclick="runScenario('hvac_no_cold_air_dispatch')">Try HVAC</button>
+          <button class="secondary" type="button" onclick="runScenario('safety_escalation_gas_or_co')">Trigger Safety</button>
+          <button class="secondary" type="button" onclick="showPhoneDashboard()">Open Ledger</button>
+          <button class="secondary" type="button" onclick="showPhoneReport()">Open ROI</button>
+          <button class="secondary" type="button" onclick="viewPhoneCsv()">View CSV</button>
+          <button class="secondary" type="button" onclick="showTab('wizard')">Open Setup</button>
+          <button class="secondary" type="button" onclick="showTab('handoff')">Copy/share text</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card"><h3>How to read a verdict card</h3><p>The badge says what happened. Then read why it matters, business value, next action, confidence, any safety note, and ledger impact. Technical JSON is intentionally hidden behind a disclosure.</p></div>
+        <div class="card"><h3>How to use the Lead Waste Ledger</h3><p>Ledger rows separate recoverable bookings from paid-lead waste and human-risk calls, so a business owner can see what the ad spend actually produced.</p></div>
+        <div class="card"><h3>How to use ROI</h3><p>Recovered gross profit equals recovered revenue times gross margin. ROI multiple equals recovered gross profit divided by the monthly fee. Setup payback shows when the setup fee is recovered.</p></div>
+        <div class="card"><h3>How to use Setup</h3><p>Enter business name, vertical, ZIP codes, services, keywords, pricing, margin, appointment slots, and risk rules. Generate JSON and save it only inside the private full-stack package or repo.</p></div>
+      </div>
+
+      <div class="panel" style="margin-top:14px">
+        <h3>How to run the full-stack local product</h3>
+        <p>Open the ZIP package, then open <strong>START_HERE.html</strong>. For a local API demo, run <strong>START_CALLSHIELD_WINDOWS.bat</strong>. It checks the build, starts the Python server, and prints the dashboard, report, CSV, and integrations links in that console.</p>
+        <p class="callout warn"><strong>Safety boundary:</strong> this public page is not live phone service, does not collect payment, does not capture raw card data by voice, does not make the private repo public, and does not call external APIs.</p>
+      </div>
+
+      <div class="panel soft">
+        <h3>What Seth should do next</h3>
+        <p>Evaluate one home inspection pilot first. Continue only if recovered gross profit beats the monthly fee, critical escalation failures stay at zero, setup is repeatable, and the customer can understand the Lead Waste Ledger without technical help. HVAC is the second pilot because the transcript patterns expose high-value trust objections and dispatch leakage.</p>
       </div>
     </section>
 
@@ -1137,7 +1196,6 @@ This is a static phone demo, not live phone service. It shows how CallShield cla
     calc();
     makeConfig();
     updateHandoffText();
-    renderPhoneDashboard();
   </script>
 </body>
 </html>

@@ -18,14 +18,21 @@
       --accent:#0f766e;
       --accent-dark:#0b4f4a;
       --blue:#245c9a;
+      --blue-soft:#edf5ff;
       --amber:#9a5d13;
+      --amber-soft:#fff7ec;
       --red:#a53a3a;
+      --red-soft:#fff3f3;
       --green:#13795b;
+      --green-soft:#effaf5;
+      --violet:#5b4aa2;
+      --violet-soft:#f5f2ff;
       --shadow:0 8px 24px rgba(23, 32, 42, 0.08);
+      --shadow-strong:0 22px 56px rgba(23, 32, 42, 0.18);
     }
     * { box-sizing:border-box; }
     html { background:var(--bg); }
-    body { margin:0; font-family:Arial, Helvetica, sans-serif; color:var(--ink); background:var(--bg); }
+    body { margin:0; font-family:Arial, Helvetica, sans-serif; color:var(--ink); background:linear-gradient(180deg,#f7fafc 0,#eef3f7 38%,#f8fafc 100%); }
     [hidden] { display:none !important; }
     button, input, select, textarea { font:inherit; }
     button, a { -webkit-tap-highlight-color:transparent; }
@@ -35,18 +42,29 @@
       outline-offset:2px;
     }
     .shell { max-width:1160px; margin:0 auto; padding:0 18px 34px; }
-    .hero { background:#15242d; color:#fff; padding:22px 0 18px; }
-    .hero-grid { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(280px,0.8fr); gap:18px; align-items:end; }
+    .hero { background:#10202a; color:#fff; padding:24px 0 20px; border-bottom:1px solid rgba(255,255,255,0.08); }
+    .hero-grid { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(320px,0.95fr); gap:20px; align-items:stretch; }
     .eyebrow { display:inline-flex; gap:8px; align-items:center; margin:0 0 10px; color:#d9f2ed; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0; }
     .dot { width:9px; height:9px; border-radius:999px; background:#48cdbb; display:inline-block; }
-    h1 { margin:0; font-size:38px; line-height:1.08; letter-spacing:0; }
+    h1 { margin:0; font-size:40px; line-height:1.06; letter-spacing:0; }
     h2 { margin:0 0 10px; font-size:25px; letter-spacing:0; }
     h3 { margin:0 0 8px; font-size:17px; letter-spacing:0; }
     p { line-height:1.48; }
     .hero p { color:#e4eef2; max-width:860px; font-size:17px; }
-    .hero-card { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:16px; }
+    .hero-card { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:16px; box-shadow:var(--shadow-strong); }
     .hero-card strong { display:block; color:#fff; margin-bottom:6px; }
     .hero-card span { display:block; color:#e4eef2; line-height:1.42; }
+    .hero-command { display:grid; gap:12px; min-height:100%; }
+    .command-top { display:flex; justify-content:space-between; gap:10px; align-items:center; color:#e4eef2; font-weight:700; font-size:13px; }
+    .live-dot { width:8px; height:8px; border-radius:999px; background:#61d5c3; display:inline-block; margin-right:7px; }
+    .hero-metrics { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+    .hero-metric { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.16); border-radius:8px; padding:10px; }
+    .hero-metric .mini-label { color:#cfe0e8; margin:0 0 5px; }
+    .hero-metric strong { font-size:24px; margin:0; }
+    .signal-flow { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; }
+    .signal-node { border:1px solid rgba(255,255,255,0.17); background:rgba(255,255,255,0.09); border-radius:8px; padding:9px; min-height:64px; }
+    .signal-node b { display:block; color:#fff; font-size:13px; }
+    .signal-node span { color:#d6e5eb; font-size:12px; line-height:1.32; }
     .trust-strip { display:flex; gap:8px; flex-wrap:wrap; margin:14px 0 0; }
     .sticky-nav { position:sticky; top:0; z-index:10; background:rgba(255,255,255,0.98); border-bottom:1px solid var(--line); backdrop-filter:blur(10px); }
     .tabs { display:flex; gap:6px; overflow-x:auto; padding:10px 0; scrollbar-width:none; }
@@ -60,6 +78,26 @@
     .panel, .card, .scenario-card, .verdict-card, .seed-success { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:16px; box-shadow:var(--shadow); }
     .soft { background:#f9fbfc; box-shadow:none; }
     .lead { color:var(--muted); font-size:16px; max-width:920px; }
+    .section-heading { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; align-items:end; margin:0 0 14px; }
+    .section-heading h2 { margin-bottom:4px; }
+    .section-kicker { color:var(--accent-dark); font-size:13px; font-weight:800; text-transform:uppercase; }
+    .operator-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; margin:16px 0; }
+    .operator-tile { border:1px solid var(--line); border-radius:8px; background:#fff; padding:13px; }
+    .operator-tile strong { display:block; font-size:23px; margin:2px 0 5px; }
+    .operator-tile span { color:var(--muted); font-size:13px; line-height:1.35; }
+    .outcome-flow { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin:16px 0; }
+    .outcome-step { background:#fff; border:1px solid var(--line); border-radius:8px; padding:13px; min-height:112px; }
+    .outcome-step b { display:block; margin-bottom:6px; }
+    .outcome-step span { color:var(--muted); font-size:13px; line-height:1.35; }
+    .outcome-step.book { border-top:4px solid var(--green); }
+    .outcome-step.risk { border-top:4px solid var(--amber); }
+    .outcome-step.waste { border-top:4px solid var(--red); }
+    .outcome-step.proof { border-top:4px solid var(--blue); }
+    .answer-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin:14px 0; }
+    .answer-tile { border:1px solid var(--line); border-radius:8px; background:#fff; padding:14px; }
+    .answer-tile:nth-child(1) { background:var(--green-soft); }
+    .answer-tile:nth-child(2) { background:var(--blue-soft); }
+    .answer-tile:nth-child(3) { background:var(--amber-soft); }
     .callout { border-left:4px solid var(--accent); background:#eefaf7; border-radius:6px; padding:12px 14px; margin:14px 0; }
     .callout.warn { border-left-color:var(--amber); background:#fff7ec; }
     .callout.danger { border-left-color:var(--red); background:#fff3f3; }
@@ -96,15 +134,24 @@
     .progress-item { border:1px solid var(--line); border-radius:8px; padding:10px; background:#fff; color:#42505e; font-size:13px; font-weight:700; }
     .progress-item.done { border-color:#a8dbc7; background:#effaf5; color:#0f684e; }
     .scenario-list { display:grid; gap:12px; }
-    .scenario-card { display:grid; gap:8px; }
+    .scenario-card { display:grid; gap:8px; position:relative; overflow:hidden; }
+    .scenario-card::before { content:""; position:absolute; inset:0 0 auto; height:4px; background:var(--blue); }
+    .scenario-card[data-type="book"]::before { background:var(--green); }
+    .scenario-card[data-type="risk"]::before { background:var(--amber); }
+    .scenario-card[data-type="waste"]::before { background:var(--red); }
+    .scenario-card[data-type="future"]::before { background:var(--violet); }
     .scenario-card p { margin:0; color:var(--muted); }
     .scenario-card .mini-label { margin-top:4px; }
+    .scenario-card button { margin-top:4px; }
+    .scenario-meta { display:flex; gap:6px; flex-wrap:wrap; }
+    .scenario-meta span { border:1px solid var(--line); background:#fff; color:#354351; border-radius:999px; padding:5px 8px; font-size:12px; font-weight:700; }
     .verdict-card { margin:0 0 12px; border-top:4px solid var(--accent); }
     .verdict-card.human { border-top-color:var(--amber); }
     .verdict-card.bad { border-top-color:var(--red); }
     .verdict-card.future { border-top-color:#8261c6; }
     .verdict-grid, .summary-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:10px; margin-top:12px; }
     .summary-tile { background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px; }
+    .ledger-empty { border:1px dashed #aeb8c4; border-radius:8px; background:#fff; padding:18px; text-align:center; }
     .event-list { display:grid; gap:10px; margin-top:14px; }
     .event-card { border:1px solid var(--line); background:#fff; border-radius:8px; padding:12px; }
     .event-card-top { display:flex; justify-content:space-between; gap:8px; align-items:flex-start; margin-bottom:8px; }
@@ -118,8 +165,9 @@
       *, *::before, *::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; }
     }
     @media (max-width:860px) {
-      .hero-grid, .split { grid-template-columns:1fr; }
+      .hero-grid, .split, .section-heading { grid-template-columns:1fr; }
       h1 { font-size:31px; }
+      .signal-flow { grid-template-columns:repeat(2,minmax(0,1fr)); }
     }
     @media (max-width:560px) {
       .shell { padding:0 14px 112px; }
@@ -129,6 +177,7 @@
       .tabs { padding:9px 0; }
       .tabs button { padding:10px 11px; }
       .grid, .summary-strip, .verdict-grid { grid-template-columns:1fr; }
+      .hero-metrics, .signal-flow, .operator-strip, .outcome-flow, .answer-grid { grid-template-columns:1fr; }
       .actions { display:grid; grid-template-columns:1fr; }
       .card, .panel, .scenario-card, .verdict-card, .seed-success { padding:14px; box-shadow:none; }
       th, td { padding:8px; font-size:13px; }
@@ -157,8 +206,20 @@
           <span class="pill warn">Safety escalates to human</span>
         </div>
       </div>
-      <div class="hero-card">
-        <strong>90-second guided path</strong>
+      <div class="hero-card hero-command" aria-label="CallShield recovery command center preview">
+        <div class="command-top"><span><span class="live-dot"></span>Recovery command center</span><span id="heroMode">Ready to seed</span></div>
+        <div class="hero-metrics">
+          <div class="hero-metric"><p class="mini-label">Booked calls</p><strong id="heroBooked">0</strong></div>
+          <div class="hero-metric"><p class="mini-label">Human risk</p><strong id="heroHuman">0</strong></div>
+          <div class="hero-metric"><p class="mini-label">Waste calls</p><strong id="heroWaste">0</strong></div>
+          <div class="hero-metric"><p class="mini-label">Gross profit</p><strong id="heroGp">$0</strong></div>
+        </div>
+        <div class="signal-flow" aria-label="Paid-call recovery flow">
+          <div class="signal-node"><b>Classify</b><span>Book, waste, future, or human</span></div>
+          <div class="signal-node"><b>Guard</b><span>Safety before revenue</span></div>
+          <div class="signal-node"><b>Ledger</b><span>Reason and next action</span></div>
+          <div class="signal-node"><b>Prove</b><span>Recovered gross profit</span></div>
+        </div>
         <span>Seed the demo, run Home inspection, run HVAC, trigger Safety escalation, then open Ledger, ROI, and copy the text to Seth.</span>
         <div class="actions stack">
           <button class="primary" type="button" onclick="seedPhoneDemo(true)">Run phone demo seed</button>
@@ -188,14 +249,34 @@
     <p id="globalStatus" class="sr-only" aria-live="polite"></p>
 
     <section id="start" class="tab" role="tabpanel" aria-labelledby="tab-start">
-      <h2>Start here</h2>
-      <p class="lead">CallShield is not a generic AI receptionist. It is a paid-lead recovery proof layer for home-service businesses that buy inbound calls and need to know what booked, what leaked, and what required a person.</p>
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">Start here</p>
+          <h2>Understand the product in one screen</h2>
+          <p class="lead">CallShield is not a generic AI receptionist. It is a paid-lead recovery proof layer for home-service businesses that buy inbound calls and need to know what booked, what leaked, and what required a person.</p>
+        </div>
+        <button class="primary" type="button" onclick="seedPhoneDemo(true)">Run phone demo seed</button>
+      </div>
+
+      <div class="operator-strip" aria-label="Live demo impact snapshot">
+        <div class="operator-tile"><span>Total calls</span><strong id="startTotal">0</strong><span>Seeded or classified locally</span></div>
+        <div class="operator-tile"><span>Booked calls</span><strong id="startBooked">0</strong><span>Recoverable customer revenue</span></div>
+        <div class="operator-tile"><span>Risk escalations</span><strong id="startHuman">0</strong><span>Safety and human-review calls</span></div>
+        <div class="operator-tile"><span>Gross profit</span><strong id="startGp">$0</strong><span>Proof point for ROI</span></div>
+      </div>
 
       <div class="grid">
         <div class="card"><h3>What pain it solves</h3><p>Owners spend on calls but cannot always see which calls became booked jobs, which were out of area, which were wrong service, and which wasted staff time.</p></div>
         <div class="card"><h3>Why it is different</h3><p>Receptionists answer calls. CallShield classifies paid-call outcomes, preserves risk escalation, and proves recovered gross profit.</p></div>
         <div class="card"><h3>Why home inspection first</h3><p>Home inspection has clear geography, clear service scope, urgent buyer intent, and clean ROI math.</p></div>
         <div class="card"><h3>Why HVAC second</h3><p>HVAC has the same paid-call leakage, plus higher ticket values and real trust objections like licensed technicians, stocked trucks, and floor protection.</p></div>
+      </div>
+
+      <div class="outcome-flow" aria-label="CallShield outcome flow">
+        <div class="outcome-step book"><b>Recover qualified calls</b><span>Book inspection and HVAC calls when service, geography, and intent are clear.</span></div>
+        <div class="outcome-step risk"><b>Escalate risk first</b><span>Gas, carbon monoxide, legal, medical, rehab, angry, low-confidence, or human-request language goes to a person.</span></div>
+        <div class="outcome-step waste"><b>Separate lead waste</b><span>Wrong service, out of area, and vendor/spam calls stop polluting the sales story.</span></div>
+        <div class="outcome-step proof"><b>Prove ROI</b><span>The ledger connects recovered bookings to revenue, gross profit, ROI, and pilot decisions.</span></div>
       </div>
 
       <div class="panel soft" style="margin-top:14px">
@@ -607,7 +688,9 @@
       const order = ['home_inspection_buyer_fast_schedule', 'hvac_no_cold_air_dispatch', 'hvac_trust_objections_same_day', 'safety_escalation_gas_or_co', 'wrong_service', 'out_of_area', 'vendor_spam', 'existing_customer_feedback_future_module'];
       byId('scenarioButtons').innerHTML = order.map(id => {
         const s = SCENARIOS[id];
-        return `<article class="scenario-card">
+        const type = scenarioType(id);
+        return `<article class="scenario-card" data-type="${type}">
+          <div class="scenario-meta"><span>${escapeHtml(s.vertical)}</span><span>${escapeHtml(s.value)}</span></div>
           <h3>${escapeHtml(s.label)}</h3>
           <p><strong>Caller intent:</strong> ${escapeHtml(s.intent)}</p>
           <p><strong>What CallShield should do:</strong> ${escapeHtml(s.should_do)}</p>
@@ -616,6 +699,13 @@
           <button class="primary" type="button" onclick="runScenario('${id}')">Run this call</button>
         </article>`;
       }).join('');
+    }
+
+    function scenarioType(id) {
+      if (id.includes('safety')) return 'risk';
+      if (id.includes('wrong') || id.includes('area') || id.includes('spam')) return 'waste';
+      if (id.includes('future')) return 'future';
+      return 'book';
     }
 
     function showTab(tabId, focusTab = false) {
@@ -742,6 +832,7 @@
         byId('verdictArea').innerHTML = verdictCard(event);
         byId('intakeResult').textContent = JSON.stringify({static_phone_demo:true, event_id:event.id, ...result}, null, 2);
         renderPhoneDashboard();
+        renderHeroSnapshot();
         setLiveStatus(`${formatStatus(result.status)}: ${result.next_step}`);
       } catch (err) {
         byId('verdictArea').innerHTML = `<div class="verdict-card bad"><h3>Could not classify this intake.</h3><p>Try another scenario or reload the static demo.</p></div>`;
@@ -759,6 +850,7 @@
           addPhoneEvent(payload, classifyPhoneIntake(payload));
         });
         renderPhoneDashboard();
+        renderHeroSnapshot();
         markProgress('seed');
         byId('seedSuccess').hidden = false;
         byId('intakeResult').textContent = 'Static phone demo seeded. Next: tap Live Demo and try Home inspection or HVAC.';
@@ -923,6 +1015,7 @@
     function renderPhoneDashboard() {
       seedPhoneDemoIfEmpty();
       const roi = phoneRoi();
+      const eventsMarkup = phoneLedger.length ? phoneEventMarkup(phoneLedger) : `<div class="ledger-empty"><h3>No ledger rows yet</h3><p>Tap Run phone demo seed or run a scenario. The ledger will show booked calls, waste, human escalations, and gross profit.</p></div>`;
       byId('phoneDashboard').innerHTML = `<div class="panel">
         <h3>Static Demo Lead Waste Ledger</h3>
         <div class="summary-strip">
@@ -934,8 +1027,9 @@
           <div class="summary-tile"><p class="mini-label">Estimated gross profit</p><strong class="metric">${money(roi.recovered_gross_profit)}</strong></div>
           <div class="summary-tile"><p class="mini-label">ROI multiple</p><strong class="metric">${roi.roi_multiple.toFixed(1)}x</strong></div>
         </div>
-        ${phoneEventMarkup(phoneLedger)}
+        ${eventsMarkup}
       </div>`;
+      renderHeroSnapshot();
     }
 
     function showPhoneReport(switchTab = true) {
@@ -958,6 +1052,28 @@
         </div>
         <p class="callout"><strong>${decision}.</strong> Start with home inspection, then test HVAC because trust objections and dispatch leakage are visible in the transcript patterns.</p>
       </div>`;
+      renderHeroSnapshot();
+    }
+
+    function renderHeroSnapshot() {
+      const roi = phoneRoi();
+      const human = roi.human;
+      const waste = roi.waste + roi.future;
+      const values = {
+        heroBooked: roi.bookings,
+        heroHuman: human,
+        heroWaste: waste,
+        heroGp: money(roi.recovered_gross_profit),
+        startTotal: roi.events,
+        startBooked: roi.bookings,
+        startHuman: human,
+        startGp: money(roi.recovered_gross_profit),
+        heroMode: roi.events ? 'Ledger live' : 'Ready to seed'
+      };
+      Object.entries(values).forEach(([id, value]) => {
+        const node = byId(id);
+        if (node) node.textContent = value;
+      });
     }
 
     function phoneEventMarkup(events) {
@@ -1196,6 +1312,7 @@ This is a static phone demo, not live phone service. It shows how CallShield cla
     calc();
     makeConfig();
     updateHandoffText();
+    renderHeroSnapshot();
   </script>
 </body>
 </html>

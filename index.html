@@ -98,6 +98,22 @@
     .answer-tile:nth-child(1) { background:var(--green-soft); }
     .answer-tile:nth-child(2) { background:var(--blue-soft); }
     .answer-tile:nth-child(3) { background:var(--amber-soft); }
+    .learning-rail { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin:14px 0; }
+    .learning-card { border:1px solid var(--line); border-radius:8px; background:#fff; padding:12px; min-height:124px; position:relative; overflow:hidden; }
+    .learning-card::before { content:""; position:absolute; inset:0 0 auto; height:4px; background:var(--blue); }
+    .learning-card:nth-child(2)::before { background:var(--green); }
+    .learning-card:nth-child(3)::before { background:var(--amber); }
+    .learning-card:nth-child(4)::before { background:var(--violet); }
+    .learning-card:nth-child(5)::before { background:var(--red); }
+    .learning-card strong { display:block; margin:0 0 5px; }
+    .learning-card span { color:var(--muted); font-size:13px; line-height:1.35; }
+    .coach-panel { display:grid; grid-template-columns:minmax(0,0.95fr) minmax(280px,1.05fr); gap:12px; align-items:stretch; }
+    .coach-card { border:1px solid var(--line); border-radius:8px; background:#fff; padding:14px; }
+    .coach-card.highlight { background:linear-gradient(180deg,#eefaf7 0,#fff 100%); border-color:#a8dbc7; }
+    .tour-meter { display:grid; gap:8px; }
+    .tour-stage { display:grid; grid-template-columns:30px 1fr; gap:8px; align-items:start; border:1px solid var(--line); border-radius:8px; padding:9px; background:#fff; }
+    .tour-stage b { width:28px; height:28px; border-radius:999px; display:grid; place-items:center; background:#e6f4f2; color:var(--accent-dark); }
+    .tour-stage span { color:var(--muted); font-size:13px; line-height:1.35; }
     .callout { border-left:4px solid var(--accent); background:#eefaf7; border-radius:6px; padding:12px 14px; margin:14px 0; }
     .callout.warn { border-left-color:var(--amber); background:#fff7ec; }
     .callout.danger { border-left-color:var(--red); background:#fff3f3; }
@@ -177,7 +193,7 @@
       .tabs { padding:9px 0; }
       .tabs button { padding:10px 11px; }
       .grid, .summary-strip, .verdict-grid { grid-template-columns:1fr; }
-      .hero-metrics, .signal-flow, .operator-strip, .outcome-flow, .answer-grid { grid-template-columns:1fr; }
+      .hero-metrics, .signal-flow, .operator-strip, .outcome-flow, .answer-grid, .learning-rail, .coach-panel { grid-template-columns:1fr; }
       .actions { display:grid; grid-template-columns:1fr; }
       .card, .panel, .scenario-card, .verdict-card, .seed-success { padding:14px; box-shadow:none; }
       th, td { padding:8px; font-size:13px; }
@@ -316,6 +332,39 @@
       <p class="lead">Use this path if Seth has no prior context. It explains what CallShield is, what each tab proves, and how to move from the public phone demo to the full-stack package.</p>
 
       <div class="callout"><strong>What CallShield is:</strong> a Paid-Lead Intake Recovery OS. It classifies paid inbound calls, books qualified jobs, escalates safety or regulated risk to a human, separates lead waste, and proves recovered gross profit.</div>
+
+      <h3>Learning path for Seth</h3>
+      <div class="learning-rail" aria-label="Learning path for Seth">
+        <div class="learning-card"><strong>1. Understand</strong><span>Start with paid-call leakage, not receptionist automation.</span></div>
+        <div class="learning-card"><strong>2. Operate</strong><span>Seed the demo and run realistic Home inspection and HVAC calls.</span></div>
+        <div class="learning-card"><strong>3. Guard</strong><span>Trigger safety and human escalation before any revenue logic.</span></div>
+        <div class="learning-card"><strong>4. Prove</strong><span>Open Ledger, ROI, CSV, and integrations to see full-stack proof.</span></div>
+        <div class="learning-card"><strong>5. Decide</strong><span>Use the pilot checklist to decide whether to run home inspection first.</span></div>
+      </div>
+
+      <div class="panel coach-panel" aria-label="Guided learning mode">
+        <div class="coach-card highlight">
+          <p class="section-kicker">Guided learning mode</p>
+          <h3>Use this if Seth is starting from zero</h3>
+          <p>This mode seeds the ledger, keeps Seth on the walkthrough, and gives one clear next action at a time: learn the wedge, run a booking, trigger a guardrail, inspect the ledger, read ROI, then copy the handoff text.</p>
+          <div class="actions">
+            <button class="primary" type="button" onclick="startGuidedLearning()">Start guided learning mode</button>
+            <button class="secondary" type="button" onclick="showTab('demo')">Operate the product</button>
+            <button class="secondary" type="button" onclick="showTab('model')">Open decision cockpit</button>
+          </div>
+          <p id="tutorialStatus" class="mini-label" aria-live="polite"></p>
+        </div>
+        <div class="coach-card">
+          <h3>Click-by-click operating loop</h3>
+          <div class="tour-meter">
+            <div class="tour-stage"><b>1</b><span><strong>Seed.</strong> Load believable calls with no server and no customer data leaving the phone.</span></div>
+            <div class="tour-stage"><b>2</b><span><strong>Classify.</strong> Run Home inspection, HVAC, Safety, Wrong service, Out of area, and Vendor.</span></div>
+            <div class="tour-stage"><b>3</b><span><strong>Explain.</strong> Read the verdict card before opening Technical JSON.</span></div>
+            <div class="tour-stage"><b>4</b><span><strong>Prove.</strong> View Ledger, ROI, CSV fallback, integrations JSON, and Setup JSON.</span></div>
+            <div class="tour-stage"><b>5</b><span><strong>Implement.</strong> Move to the private full-stack ZIP only after the phone demo story is clear.</span></div>
+          </div>
+        </div>
+      </div>
 
       <div class="grid">
         <div class="card"><h3>1. Start with the problem</h3><p>Paid calls can leak into missed bookings, out-of-area calls, wrong-service requests, vendor spam, or human-risk calls. CallShield turns each call into a clear business outcome.</p></div>
@@ -862,6 +911,14 @@
       } catch (err) {
         setLiveStatus('Demo seed failed. Reload the page and try again.');
       }
+    }
+
+    function startGuidedLearning() {
+      seedPhoneDemo(false);
+      showTab('tutorial');
+      const status = byId('tutorialStatus');
+      if (status) status.textContent = 'Guided learning started. Next: tap Try Home inspection, then Try HVAC, then Trigger Safety.';
+      setLiveStatus('Guided learning mode started. Demo data is seeded and the walkthrough is ready.');
     }
 
     function classifyPhoneIntake(payload) {

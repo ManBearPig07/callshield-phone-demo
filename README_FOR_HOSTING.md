@@ -39,16 +39,18 @@ This link is served from a separate public GitHub Pages repository containing on
 2. Tap **Start**.
 3. Tap **Run phone demo seed**.
 4. Tap **Walkthrough** for the click-by-click tutorial.
-5. Tap **Live Demo**.
-6. Try **Home inspection**, **HVAC**, **Safety**, **Wrong service**, **Out of area**, and **Vendor**.
-7. Tap **Ledger** and **ROI**.
-8. Tap **Copy text to Seth** or **Share this demo** on **Next** if he wants to forward the demo.
-9. Review **Integrations**, **Setup**, and **Next**.
+5. Tap **Call Lifecycle** to review the simulated live-call agents, stakeholders, variables, scripted conversations, ledger impact, and learning loop.
+6. Tap **Live Demo**.
+7. Try **Home inspection**, **HVAC**, **Safety**, **Wrong service**, **Out of area**, and **Vendor**.
+8. Tap **Ledger** and **ROI**.
+9. Tap **Copy text to Seth** or **Share this demo** on **Next** if he wants to forward the demo.
+10. Review **Integrations**, **Setup**, and **Next**.
 
 ## What the demo does
 
 - Explains CallShield from scratch.
 - Includes a click-by-click Walkthrough tab for a nontechnical user.
+- Includes a Call Lifecycle tab with simulated live-call agents, case-study variables, stakeholders, scripted conversations, ledger impact, and human-reviewed learning loop.
 - Shows why CallShield is not a generic AI receptionist.
 - Runs transcript-derived static demo scenarios on the phone.
 - Builds a local in-browser Lead Waste Ledger.

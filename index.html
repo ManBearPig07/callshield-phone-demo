@@ -114,6 +114,21 @@
     .tour-stage { display:grid; grid-template-columns:30px 1fr; gap:8px; align-items:start; border:1px solid var(--line); border-radius:8px; padding:9px; background:#fff; }
     .tour-stage b { width:28px; height:28px; border-radius:999px; display:grid; place-items:center; background:#e6f4f2; color:var(--accent-dark); }
     .tour-stage span { color:var(--muted); font-size:13px; line-height:1.35; }
+    .lifecycle-grid { display:grid; grid-template-columns:minmax(220px,0.8fr) minmax(320px,1.2fr); gap:14px; align-items:start; }
+    .lifecycle-cards { display:grid; gap:10px; }
+    .lifecycle-card { text-align:left; border:1px solid var(--line); background:#fff; border-radius:8px; padding:12px; cursor:pointer; min-height:78px; }
+    .lifecycle-card strong { display:block; margin-bottom:4px; }
+    .lifecycle-card span { color:var(--muted); font-size:13px; line-height:1.35; }
+    .lifecycle-card.active { border-color:var(--accent); background:#eefaf7; }
+    .lifecycle-detail { display:grid; gap:12px; }
+    .lifecycle-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)); gap:8px; }
+    .lifecycle-mini { border:1px solid var(--line); border-radius:8px; padding:10px; background:#fff; }
+    .lifecycle-mini strong { display:block; }
+    .lifecycle-mini span { color:var(--muted); font-size:13px; line-height:1.35; }
+    .script-line { border:1px solid var(--line); border-radius:8px; background:#fff; padding:10px; margin:8px 0; }
+    .script-line b { display:block; color:var(--accent-dark); margin-bottom:4px; }
+    .chip-list { display:flex; flex-wrap:wrap; gap:7px; }
+    .chip-list span { border:1px solid var(--line); border-radius:999px; background:#fff; padding:6px 8px; font-size:12px; font-weight:700; color:#354351; }
     .callout { border-left:4px solid var(--accent); background:#eefaf7; border-radius:6px; padding:12px 14px; margin:14px 0; }
     .callout.warn { border-left-color:var(--amber); background:#fff7ec; }
     .callout.danger { border-left-color:var(--red); background:#fff3f3; }
@@ -193,7 +208,7 @@
       .tabs { padding:9px 0; }
       .tabs button { padding:10px 11px; }
       .grid, .summary-strip, .verdict-grid { grid-template-columns:1fr; }
-      .hero-metrics, .signal-flow, .operator-strip, .outcome-flow, .answer-grid, .learning-rail, .coach-panel { grid-template-columns:1fr; }
+      .hero-metrics, .signal-flow, .operator-strip, .outcome-flow, .answer-grid, .learning-rail, .coach-panel, .lifecycle-grid { grid-template-columns:1fr; }
       .actions { display:grid; grid-template-columns:1fr; }
       .card, .panel, .scenario-card, .verdict-card, .seed-success { padding:14px; box-shadow:none; }
       th, td { padding:8px; font-size:13px; }
@@ -251,6 +266,7 @@
       <div class="tabs" role="tablist" aria-label="CallShield public demo sections">
         <button id="tab-start" role="tab" aria-selected="true" aria-controls="start" tabindex="0" data-tab="start">Start</button>
         <button id="tab-tutorial" role="tab" aria-selected="false" aria-controls="tutorial" tabindex="-1" data-tab="tutorial">Walkthrough</button>
+        <button id="tab-lifecycle" role="tab" aria-selected="false" aria-controls="lifecycle" tabindex="-1" data-tab="lifecycle">Call Lifecycle</button>
         <button id="tab-demo" role="tab" aria-selected="false" aria-controls="demo" tabindex="-1" data-tab="demo">Live Demo</button>
         <button id="tab-ledger" role="tab" aria-selected="false" aria-controls="ledger" tabindex="-1" data-tab="ledger">Ledger</button>
         <button id="tab-model" role="tab" aria-selected="false" aria-controls="model" tabindex="-1" data-tab="model">ROI</button>
@@ -445,6 +461,23 @@
             <pre id="intakeResult">Static phone demo is ready. Tap a scenario or run intake.</pre>
           </details>
           <p class="callout warn">Safety, legal, medical, rehab, angry caller, caller asks for a human, and low-confidence calls escalate to a person first. Deposit/payment link language is allowed; the demo never collects raw card data by voice.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="lifecycle" class="tab" role="tabpanel" aria-labelledby="tab-lifecycle" hidden>
+      <h2>Simulated live call-agent lifecycle</h2>
+      <p class="lead">This is a scripted training and demo lab. It shows the full call lifecycle, agent roles, stakeholder handoffs, variables, conversations, ledger impact, and learning loop without placing calls or connecting to a live phone provider.</p>
+      <div class="callout warn"><strong>Boundary:</strong> this is not live phone service, not outbound cold calling, not deceptive human impersonation, and not model training on private customer data. Safety and human-request language still escalates before every other agent.</div>
+      <div class="lifecycle-grid">
+        <div class="panel">
+          <h3>Case-study scripts</h3>
+          <p class="mini-label">Tap a lifecycle to see the agents, stakeholders, variables, scripted conversation, and learning loop.</p>
+          <div id="lifecycleCards" class="lifecycle-cards"></div>
+        </div>
+        <div class="panel">
+          <h3>Lifecycle detail</h3>
+          <div id="lifecycleDetail" class="lifecycle-detail" aria-live="polite"></div>
         </div>
       </div>
     </section>
@@ -724,6 +757,87 @@
         message: 'I am an existing customer. The larger size would fit better, the product was warm, and it meant a lot to my family. I can share feedback, maybe leave a review, and use a reorder discount later.'
       }
     };
+    const LIFECYCLE_CASES = {
+      home_inspection_buyer_fast_schedule: {
+        title: 'Home inspection buyer booking lifecycle',
+        goal: 'Recover a high-intent buyer call and book a comprehensive inspection quickly.',
+        stakeholders: ['Buyer caller', 'Home inspection owner', 'Inspector', 'agent or access contact', 'Gary as pilot operator', 'Seth as evaluator'],
+        variables: ['caller identity', 'demo-safe phone', 'property type', 'square footage', 'address and ZIP', 'inspection package', 'appointment window', 'report timing', 'access', 'pets', 'deposit link without card capture', 'source', 'ticket', 'gross margin'],
+        agents: ['Disclosure Agent', 'Intake Agent', 'Buyer Education Agent', 'Scheduler Agent', 'Ledger Analyst'],
+        lifecycle: ['Paid source creates inbound call.', 'Disclosure Agent states CallShield scheduling automation and boundaries.', 'Safety Guardrail checks emergency and regulated language first.', 'Intake Agent collects buyer, property, ZIP, schedule, access, pets, and report details.', 'Scheduler Agent confirms the appointment and handoff notes.', 'Ledger Analyst records booked_lead, recovered revenue, gross profit, source, reason, and next step.'],
+        script: [
+          ['CallShield', 'This is CallShield scheduling automation for the inspection company. I can help collect booking details and will escalate risky or out-of-scope issues to a person.'],
+          ['Caller', 'I just put an offer on a home and need an inspection quickly.'],
+          ['Intake Agent', 'May I collect your name, best phone number, property type, square footage, address, and ZIP code?'],
+          ['Buyer Education Agent', 'For a buyer, the comprehensive inspection is the right starting point. The report is delivered digitally after the inspection.'],
+          ['Scheduler Agent', 'Next Thursday morning is available in this demo. I will note access, pets, and that a deposit link should be sent without taking card details by voice.'],
+          ['Ledger Analyst', 'Outcome: booked lead. Recovered revenue and gross profit are recorded for ROI proof.']
+        ],
+        knowledge: ['Keep comprehensive inspection as the buyer default.', 'Add report timing and access notes to FAQ.', 'Keep deposit-link wording but never capture raw card data by voice.', 'Add tests for any new safety phrase before policy changes.']
+      },
+      hvac_no_cold_air_dispatch: {
+        title: 'HVAC no-cold-air booking lifecycle',
+        goal: 'Recover an AC not-cooling call while preserving trust objections and technician notes.',
+        stakeholders: ['Homeowner caller', 'HVAC dispatcher', 'Licensed technician', 'Service manager', 'Gary as pilot operator', 'Seth as evaluator'],
+        variables: ['AC symptom', 'dispatch urgency', 'appointment window', 'licensed and insured question', 'employee versus contractor question', 'stocked truck question', 'marble floor protection', 'dogs or pets', 'call-ahead text', 'service ZIP', 'diagnostic ticket', 'gross margin'],
+        agents: ['Disclosure Agent', 'HVAC Intake Agent', 'Trust Objection Agent', 'Scheduler Agent', 'Ledger Analyst'],
+        lifecycle: ['Paid HVAC call enters CallShield.', 'Safety Guardrail checks gas, carbon monoxide, fire, electrical burning, flooding, or human request.', 'HVAC Intake Agent captures symptom, urgency, address, ZIP, and appointment preference.', 'Trust Objection Agent preserves licensed, insured, employee, stocked truck, floor, pet, and call-ahead questions.', 'Scheduler Agent books diagnostic or appointment window.', 'Ledger Analyst records booked_lead and trust-objection data.'],
+        script: [
+          ['CallShield', 'This is CallShield scheduling automation for the HVAC company. I can collect service details and escalate safety concerns to a person.'],
+          ['Caller', 'My AC is blowing air but it is not cold. I wanted dispatch today, but I can schedule.'],
+          ['HVAC Intake Agent', 'What is the service address and ZIP, and is there any gas smell, fire, electrical burning, carbon monoxide alarm, or active flooding?'],
+          ['Caller', 'No safety issue. Are the technicians licensed and insured, and are they employees or contractors?'],
+          ['Trust Objection Agent', 'I will note licensed and insured, employee status, stocked truck, marble floor protection, dogs, and call-ahead text request.'],
+          ['Ledger Analyst', 'Outcome: booked lead. HVAC diagnostic value and trust-objection notes are recorded.']
+        ],
+        knowledge: ['Promote trust objections into HVAC FAQ after human approval.', 'Keep same-day versus scheduled appointment as a dispatch variable.', 'Review objection frequency weekly.', 'Never let HVAC conversion override safety escalation.']
+      },
+      safety_escalation_gas_or_co: {
+        title: 'Safety escalation lifecycle',
+        goal: 'Escalate risk to a human before booking, waste classification, or future-module logic.',
+        stakeholders: ['Caller', 'Human escalation contact', 'Business owner', 'CallShield safety guardrail', 'Gary as pilot operator', 'Seth as evaluator'],
+        variables: ['gas smell', 'carbon monoxide alarm', 'electrical burning', 'active flooding', 'fire', 'legal request', 'medical or rehab language', 'angry caller', 'low confidence', 'caller asks for human'],
+        agents: ['Safety Guardrail', 'Human Escalation Agent', 'Ledger Analyst'],
+        lifecycle: ['Caller mentions risk language.', 'Safety Guardrail classifies human_required first.', 'Automation stops giving operational guidance.', 'Human escalation path is triggered.', 'Ledger records safety reason, next step, confidence, and zero revenue.'],
+        script: [
+          ['Caller', 'The AC is not cooling and I smell gas. The carbon monoxide alarm may be going off.'],
+          ['Safety Guardrail', 'I need to escalate this to a person immediately. I cannot troubleshoot safety issues in this demo.'],
+          ['Human Escalation Agent', 'Outcome: human required. The configured human contact handles the next step.'],
+          ['Ledger Analyst', 'Ledger impact: human_required safety escalation, no booking, no revenue estimate, and no automated advice.']
+        ],
+        knowledge: ['Every new risk phrase becomes a candidate deterministic safety term after human review.', 'Safety tests update before policy changes ship.', 'Safety rows are reviewed separately from ROI wins.', 'Success metric is zero critical escalation failures.']
+      },
+      lead_waste_classification: {
+        title: 'Wrong-service, out-of-area, and vendor waste lifecycle',
+        goal: 'Separate paid-lead waste from recovered bookings so the owner can inspect source quality.',
+        stakeholders: ['Caller or vendor', 'Business owner', 'Marketing source owner', 'Pilot reviewer', 'Ledger Analyst', 'Gary as pilot operator', 'Seth as evaluator'],
+        variables: ['requested service', 'configured services', 'caller ZIP', 'service ZIPs', 'source channel', 'vendor phrase', 'lead waste category', 'campaign adjustment note'],
+        agents: ['Waste Filter Agent', 'Campaign Insight Agent', 'Ledger Analyst'],
+        lifecycle: ['Inbound call enters safety-first policy.', 'No safety or human escalation applies.', 'Waste Filter Agent compares request against ZIPs, services, and spam terms.', 'Ledger Analyst records out_of_area, wrong_service_or_unclear, or spam_or_vendor.', 'Campaign Insight Agent recommends targeting or source review.'],
+        script: [
+          ['Caller', 'Can you do mold remediation after water damage?'],
+          ['Waste Filter Agent', 'That does not match the configured home inspection or HVAC pilot services.'],
+          ['Ledger Analyst', 'Outcome: wrong service. Paid-lead waste row is recorded with reason and next targeting step.'],
+          ['Campaign Insight Agent', 'Review ad keywords and source targeting so remediation calls do not pollute booked-call ROI.']
+        ],
+        knowledge: ['Wrong-service terms become config candidates after human review.', 'Out-of-area ZIPs are reported to source owner.', 'Vendor/spam phrases are suppressed from sales metrics.', 'No lead resale workflow is introduced.']
+      },
+      existing_customer_feedback_future_module: {
+        title: 'Existing-customer feedback future-module lifecycle',
+        goal: 'Capture feedback as a future add-on without turning CallShield into outbound cold calling.',
+        stakeholders: ['Existing customer', 'Customer success owner', 'Business owner', 'Review or reorder workflow owner', 'Gary as pilot operator', 'Seth as evaluator'],
+        variables: ['existing customer status', 'feedback theme', 'sizing recommendation', 'warmth or quality feedback', 'review intent', 'reorder or discount interest', 'opt-in status', 'future-module flag'],
+        agents: ['Feedback Capture Agent', 'Sentiment Summary Agent', 'Ledger Analyst'],
+        lifecycle: ['Existing customer provides opted-in feedback.', 'Safety and human-request terms still run first.', 'Feedback Capture Agent records feedback as future_module only.', 'Sentiment Summary Agent prepares review or reorder notes.', 'Ledger Analyst keeps the row separate from inbound paid-lead ROI.'],
+        script: [
+          ['Existing Customer', 'The larger size might fit better, it was warm, and I can share feedback.'],
+          ['Feedback Capture Agent', 'Thank you. I will mark this as existing-customer feedback for human review, not paid-lead intake.'],
+          ['Sentiment Summary Agent', 'Summary: sizing recommendation, warmth feedback, possible review, possible reorder interest.'],
+          ['Ledger Analyst', 'Outcome: future module. This is excluded from core inbound paid-lead ROI.']
+        ],
+        knowledge: ['Feedback themes may inform future review or reorder modules.', 'Opt-in and existing-customer status must be preserved.', 'Safety or human-request terms override feedback capture.', 'No cold call workflow is created.']
+      }
+    };
     let phoneLedger = [];
     let phoneEventId = 1;
     const byId = id => document.getElementById(id);
@@ -748,6 +862,38 @@
           <button class="primary" type="button" onclick="runScenario('${id}')">Run this call</button>
         </article>`;
       }).join('');
+    }
+
+    function renderLifecycleCases() {
+      const ids = Object.keys(LIFECYCLE_CASES);
+      byId('lifecycleCards').innerHTML = ids.map((id, index) => {
+        const item = LIFECYCLE_CASES[id];
+        return `<button class="lifecycle-card ${index === 0 ? 'active' : ''}" type="button" data-lifecycle="${id}" onclick="runLifecycle('${id}')"><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(item.goal)}</span></button>`;
+      }).join('');
+      runLifecycle(ids[0], false);
+    }
+
+    function runLifecycle(id, switchTab = true) {
+      const item = LIFECYCLE_CASES[id];
+      if (!item) return;
+      document.querySelectorAll('[data-lifecycle]').forEach(button => button.classList.toggle('active', button.dataset.lifecycle === id));
+      if (switchTab) showTab('lifecycle');
+      byId('lifecycleDetail').innerHTML = `<div class="callout"><strong>${escapeHtml(item.title)}:</strong> ${escapeHtml(item.goal)}</div>
+        <div class="lifecycle-strip">
+          <div class="lifecycle-mini"><strong>${item.stakeholders.length}</strong><span>Stakeholders mapped</span></div>
+          <div class="lifecycle-mini"><strong>${item.variables.length}</strong><span>Variables captured</span></div>
+          <div class="lifecycle-mini"><strong>${item.agents.length}</strong><span>Simulated agents</span></div>
+          <div class="lifecycle-mini"><strong>${item.lifecycle.length}</strong><span>Lifecycle steps</span></div>
+        </div>
+        <div class="grid">
+          <div class="card"><h3>Stakeholders</h3><div class="chip-list">${item.stakeholders.map(value => `<span>${escapeHtml(value)}</span>`).join('')}</div></div>
+          <div class="card"><h3>Variables</h3><div class="chip-list">${item.variables.map(value => `<span>${escapeHtml(value)}</span>`).join('')}</div></div>
+        </div>
+        <div class="card"><h3>Agent roster</h3><div class="chip-list">${item.agents.map(value => `<span>${escapeHtml(value)}</span>`).join('')}</div></div>
+        <div class="card"><h3>Full lifecycle</h3><ol>${item.lifecycle.map(value => `<li>${escapeHtml(value)}</li>`).join('')}</ol></div>
+        <div class="card"><h3>Full scripted agent conversation</h3>${item.script.map(([speaker, line]) => `<div class="script-line"><b>${escapeHtml(speaker)}</b><span>${escapeHtml(line)}</span></div>`).join('')}</div>
+        <div class="card"><h3>Learning loop knowledge base and training review</h3><ol>${item.knowledge.map(value => `<li>${escapeHtml(value)}</li>`).join('')}</ol><p class="mini-label">This loop updates deterministic config, FAQs, tests, and human-reviewed playbooks. It does not train on private data inside the hosted demo.</p></div>`;
+      setLiveStatus(`${item.title} lifecycle loaded.`);
     }
 
     function scenarioType(id) {
@@ -1365,6 +1511,7 @@ This is a static phone demo, not live phone service. It shows how CallShield cla
     }
 
     renderScenarioButtons();
+    renderLifecycleCases();
     renderProgress();
     calc();
     makeConfig();

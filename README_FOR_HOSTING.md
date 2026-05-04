@@ -8,9 +8,15 @@ Host only the `public_demo/` folder. The file Seth should open is:
 public_demo/index.html
 ```
 
-Do not publish the private repository, `.git` folder, configs, local SQLite database files, tests, or server code. The public demo is self-contained static HTML and does not need Python, Twilio, Stripe, paid speech tools, or live phone service.
+Do not publish the private repository, `.git` folder, configs, local SQLite database files, tests, or server code. The public demo is self-contained static HTML plus local static assets and does not need Python, Twilio, Stripe, paid speech tools, or live phone service.
 
-The page includes an inline CSP meta tag that blocks external connections and external assets while allowing the inline CSS and JavaScript required for a one-file static demo.
+Include:
+
+- `public_demo/index.html`
+- `public_demo/assets/`
+- `public_demo/README_FOR_HOSTING.md`
+
+The page includes an inline CSP meta tag that blocks external connections while allowing the inline CSS/JavaScript required for the static demo and the local image asset used by the Recovery Game.
 
 ## Safe hosting options
 
@@ -40,17 +46,19 @@ This link is served from a separate public GitHub Pages repository containing on
 3. Tap **Run phone demo seed**.
 4. Tap **Walkthrough** for the click-by-click tutorial.
 5. Tap **Call Lifecycle** to review the simulated live-call agents, stakeholders, variables, scripted conversations, ledger impact, and learning loop.
-6. Tap **Live Demo**.
-7. Try **Home inspection**, **HVAC**, **Safety**, **Wrong service**, **Out of area**, and **Vendor**.
-8. Tap **Ledger** and **ROI**.
-9. Tap **Copy text to Seth** or **Share this demo** on **Next** if he wants to forward the demo.
-10. Review **Integrations**, **Setup**, and **Next**.
+6. Tap **Recovery Game** to learn the product by choosing the correct action for each call scenario.
+7. Tap **Live Demo**.
+8. Try **Home inspection**, **HVAC**, **Safety**, **Wrong service**, **Out of area**, and **Vendor**.
+9. Tap **Ledger** and **ROI**.
+10. Tap **Copy text to Seth** or **Share this demo** on **Next** if he wants to forward the demo.
+11. Review **Integrations**, **Setup**, and **Next**.
 
 ## What the demo does
 
 - Explains CallShield from scratch.
 - Includes a click-by-click Walkthrough tab for a nontechnical user.
 - Includes a Call Lifecycle tab with simulated live-call agents, case-study variables, stakeholders, scripted conversations, ledger impact, and human-reviewed learning loop.
+- Includes a Recovery Game that operationalizes booking, safety escalation, lead-waste classification, future-module boundaries, ROI proof, setup, and Seth handoff.
 - Shows why CallShield is not a generic AI receptionist.
 - Runs transcript-derived static demo scenarios on the phone.
 - Builds a local in-browser Lead Waste Ledger.

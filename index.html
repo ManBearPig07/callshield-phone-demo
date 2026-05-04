@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; media-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; media-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>CallShield Public Phone Demo</title>
   <style>
     :root {
@@ -129,6 +129,34 @@
     .script-line b { display:block; color:var(--accent-dark); margin-bottom:4px; }
     .chip-list { display:flex; flex-wrap:wrap; gap:7px; }
     .chip-list span { border:1px solid var(--line); border-radius:999px; background:#fff; padding:6px 8px; font-size:12px; font-weight:700; color:#354351; }
+    .game-shell { display:grid; grid-template-columns:minmax(280px,0.95fr) minmax(320px,1.05fr); gap:14px; align-items:start; }
+    .game-board { position:relative; min-height:360px; border-radius:8px; overflow:hidden; background:#101c26; border:1px solid #223648; box-shadow:var(--shadow-strong); }
+    .game-board img { display:block; width:100%; height:100%; min-height:360px; object-fit:cover; opacity:0.92; }
+    .game-board-overlay { position:absolute; inset:0; display:grid; align-content:end; padding:14px; background:linear-gradient(180deg,rgba(10,20,28,0.08),rgba(10,20,28,0.84)); color:#fff; }
+    .game-board-overlay h3 { font-size:22px; }
+    .game-board-overlay p { color:#e6eef3; margin:4px 0 0; }
+    .game-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:12px; }
+    .game-stat { border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.12); border-radius:8px; padding:10px; }
+    .game-stat strong { display:block; color:#fff; font-size:22px; }
+    .game-panel { display:grid; gap:12px; }
+    .mission-card { border:1px solid var(--line); border-top:4px solid var(--accent); background:#fff; border-radius:8px; padding:16px; box-shadow:var(--shadow); }
+    .mission-card.risk { border-top-color:var(--amber); }
+    .mission-card.waste { border-top-color:var(--red); }
+    .mission-card.future { border-top-color:var(--violet); }
+    .mission-card.setup { border-top-color:var(--blue); }
+    .mission-meta { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; }
+    .mission-meta span { border:1px solid var(--line); border-radius:999px; background:#fff; color:#354351; padding:5px 8px; font-size:12px; font-weight:700; }
+    .choice-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:10px; }
+    .choice-btn { border:1px solid var(--line); background:#fff; border-radius:8px; padding:10px; min-height:56px; cursor:pointer; text-align:left; font-weight:700; }
+    .choice-btn:hover { border-color:var(--accent); background:#eefaf7; }
+    .choice-btn.correct { border-color:#a8dbc7; background:#effaf5; color:#0f684e; }
+    .choice-btn.missed { border-color:#efc48b; background:#fff8ed; color:#8a4a0a; }
+    .game-feedback { border-left:4px solid var(--accent); background:#eefaf7; border-radius:6px; padding:12px 14px; min-height:74px; }
+    .game-feedback.warn { border-left-color:var(--amber); background:#fff7ec; }
+    .mission-log { display:grid; gap:8px; }
+    .mission-log .log-row { border:1px solid var(--line); background:#fff; border-radius:8px; padding:10px; }
+    .mission-log b { color:var(--accent-dark); }
+    .game-complete { border:1px solid #a8dbc7; background:#effaf5; border-radius:8px; padding:14px; }
     .callout { border-left:4px solid var(--accent); background:#eefaf7; border-radius:6px; padding:12px 14px; margin:14px 0; }
     .callout.warn { border-left-color:var(--amber); background:#fff7ec; }
     .callout.danger { border-left-color:var(--red); background:#fff3f3; }
@@ -208,7 +236,8 @@
       .tabs { padding:9px 0; }
       .tabs button { padding:10px 11px; }
       .grid, .summary-strip, .verdict-grid { grid-template-columns:1fr; }
-      .hero-metrics, .signal-flow, .operator-strip, .outcome-flow, .answer-grid, .learning-rail, .coach-panel, .lifecycle-grid { grid-template-columns:1fr; }
+      .hero-metrics, .signal-flow, .operator-strip, .outcome-flow, .answer-grid, .learning-rail, .coach-panel, .lifecycle-grid, .game-shell, .choice-grid, .game-stats { grid-template-columns:1fr; }
+      .game-board, .game-board img { min-height:260px; }
       .actions { display:grid; grid-template-columns:1fr; }
       .card, .panel, .scenario-card, .verdict-card, .seed-success { padding:14px; box-shadow:none; }
       th, td { padding:8px; font-size:13px; }
@@ -267,6 +296,7 @@
         <button id="tab-start" role="tab" aria-selected="true" aria-controls="start" tabindex="0" data-tab="start">Start</button>
         <button id="tab-tutorial" role="tab" aria-selected="false" aria-controls="tutorial" tabindex="-1" data-tab="tutorial">Walkthrough</button>
         <button id="tab-lifecycle" role="tab" aria-selected="false" aria-controls="lifecycle" tabindex="-1" data-tab="lifecycle">Call Lifecycle</button>
+        <button id="tab-game" role="tab" aria-selected="false" aria-controls="game" tabindex="-1" data-tab="game">Recovery Game</button>
         <button id="tab-demo" role="tab" aria-selected="false" aria-controls="demo" tabindex="-1" data-tab="demo">Live Demo</button>
         <button id="tab-ledger" role="tab" aria-selected="false" aria-controls="ledger" tabindex="-1" data-tab="ledger">Ledger</button>
         <button id="tab-model" role="tab" aria-selected="false" aria-controls="model" tabindex="-1" data-tab="model">ROI</button>
@@ -374,10 +404,10 @@
           <h3>Click-by-click operating loop</h3>
           <div class="tour-meter">
             <div class="tour-stage"><b>1</b><span><strong>Seed.</strong> Load believable calls with no server and no customer data leaving the phone.</span></div>
-            <div class="tour-stage"><b>2</b><span><strong>Classify.</strong> Run Home inspection, HVAC, Safety, Wrong service, Out of area, and Vendor.</span></div>
-            <div class="tour-stage"><b>3</b><span><strong>Explain.</strong> Read the verdict card before opening Technical JSON.</span></div>
-            <div class="tour-stage"><b>4</b><span><strong>Prove.</strong> View Ledger, ROI, CSV fallback, integrations JSON, and Setup JSON.</span></div>
-            <div class="tour-stage"><b>5</b><span><strong>Implement.</strong> Move to the private full-stack ZIP only after the phone demo story is clear.</span></div>
+            <div class="tour-stage"><b>2</b><span><strong>Play.</strong> Use Recovery Game to learn which action belongs to each call outcome.</span></div>
+            <div class="tour-stage"><b>3</b><span><strong>Classify.</strong> Run Home inspection, HVAC, Safety, Wrong service, Out of area, and Vendor.</span></div>
+            <div class="tour-stage"><b>4</b><span><strong>Explain.</strong> Read the verdict card before opening Technical JSON.</span></div>
+            <div class="tour-stage"><b>5</b><span><strong>Prove.</strong> View Ledger, ROI, CSV fallback, integrations JSON, and Setup JSON.</span></div>
           </div>
         </div>
       </div>
@@ -407,6 +437,7 @@
           <button class="secondary" type="button" onclick="runScenario('safety_escalation_gas_or_co')">Trigger Safety</button>
           <button class="secondary" type="button" onclick="showPhoneDashboard()">Open Ledger</button>
           <button class="secondary" type="button" onclick="showPhoneReport()">Open ROI</button>
+          <button class="secondary" type="button" onclick="showTab('game')">Play Recovery Game</button>
           <button class="secondary" type="button" onclick="viewPhoneCsv()">View CSV</button>
           <button class="secondary" type="button" onclick="showTab('wizard')">Open Setup</button>
           <button class="secondary" type="button" onclick="showTab('handoff')">Copy/share text</button>
@@ -478,6 +509,51 @@
         <div class="panel">
           <h3>Lifecycle detail</h3>
           <div id="lifecycleDetail" class="lifecycle-detail" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="game" class="tab" role="tabpanel" aria-labelledby="tab-game" hidden>
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">Interactive training game</p>
+          <h2>CallShield Recovery Quest</h2>
+          <p class="lead">A phone-friendly learning game that makes Seth operate the whole product: classify calls, protect safety, separate paid-lead waste, prove ROI, and decide the next pilot step.</p>
+        </div>
+        <button class="primary" type="button" onclick="resetGame()">Restart game</button>
+      </div>
+      <div class="callout warn"><strong>Boundary:</strong> this is a static training game. It does not place live calls, does not connect to a phone carrier, does not collect payment, does not call external APIs, and does not train on private customer data.</div>
+      <div class="game-shell">
+        <div class="game-board" aria-label="CallShield Recovery Quest command board">
+          <img src="assets/callshield-game-board.png" alt="CallShield game board showing a paid call routed through safety, booking, ledger, ROI, and setup checkpoints">
+          <div class="game-board-overlay">
+            <h3>Mission map</h3>
+            <p>Move from paid inbound call to safety guardrail, booking or waste decision, Lead Waste Ledger, ROI proof, setup, and Seth handoff.</p>
+            <div class="game-stats" aria-label="Recovery game score">
+              <div class="game-stat"><span>Mission</span><strong id="gameMissionCount">1/8</strong></div>
+              <div class="game-stat"><span>Correct</span><strong id="gameScore">0</strong></div>
+              <div class="game-stat"><span>Readiness</span><strong id="gameReadiness">0%</strong></div>
+            </div>
+          </div>
+        </div>
+        <div class="game-panel">
+          <div id="gameMission" aria-live="polite"></div>
+          <div id="gameFeedback" class="game-feedback">Choose the action CallShield should take. The game teaches the business reason and the safe operational next step.</div>
+          <div class="actions">
+            <button class="secondary" type="button" onclick="nextGameMission()">Next mission</button>
+            <button class="secondary" type="button" onclick="showTab('lifecycle')">Open lifecycle lab</button>
+            <button class="secondary" type="button" onclick="showPhoneDashboard()">Open Ledger</button>
+            <button class="secondary" type="button" onclick="showPhoneReport()">Open ROI</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel soft" style="margin-top:14px">
+        <h3>What the game teaches</h3>
+        <div class="grid">
+          <div class="card"><h3>Stakeholders</h3><p>Caller, business owner, dispatcher, technician or inspector, human escalation contact, Gary as pilot operator, and Seth as evaluator.</p></div>
+          <div class="card"><h3>Variables</h3><p>ZIP, service, source, urgency, safety terms, appointment window, trust objections, revenue, margin, confidence, next step, and lead-waste category.</p></div>
+          <div class="card"><h3>Agent loop</h3><p>Disclosure, Safety Guardrail, Intake, Trust Objection, Scheduler, Waste Filter, Ledger Analyst, ROI Analyst, Setup Coach, and Human Review.</p></div>
+          <div class="card"><h3>Learning loop</h3><p>Human-reviewed FAQs, deterministic config updates, regression tests, customer playbooks, and weekly pilot review. No hidden model training occurs in this page.</p></div>
         </div>
       </div>
     </section>
@@ -625,6 +701,7 @@
       home: 'Home inspection run',
       hvac: 'HVAC run',
       safety: 'Safety run',
+      game: 'Recovery game played',
       ledger: 'Ledger viewed',
       roi: 'ROI viewed',
       csv: 'CSV exported or copied',
@@ -838,6 +915,107 @@
         knowledge: ['Feedback themes may inform future review or reorder modules.', 'Opt-in and existing-customer status must be preserved.', 'Safety or human-request terms override feedback capture.', 'No cold call workflow is created.']
       }
     };
+    const GAME_ACTIONS = {
+      book: 'Book qualified lead',
+      escalate: 'Escalate to human',
+      waste: 'Classify waste',
+      future: 'Mark future module',
+      setup: 'Configure pilot',
+      prove: 'Prove ROI/send Seth'
+    };
+    const GAME_MISSIONS = [
+      {
+        id: 'home_inspection',
+        type: 'book',
+        title: 'Mission 1: Home inspection buyer',
+        caller: 'Buyer just made an offer and needs a fast comprehensive inspection.',
+        correct: 'book',
+        proof: 'This recovers a high-intent paid call and creates a booked lead with report timing, access, pets, insurance, certification, and deposit-link notes.',
+        stakeholders: ['Buyer caller', 'inspection owner', 'inspector', 'access contact'],
+        variables: ['ZIP in service area', 'property details', 'appointment window', 'report delivery', 'deposit link without card capture'],
+        script: ['Caller: I just put an offer on a home.', 'Intake Agent: I can collect buyer inspection details.', 'Scheduler Agent: Next Thursday morning is available in this demo.', 'Ledger Analyst: booked_lead with recovered gross profit.']
+      },
+      {
+        id: 'hvac_no_cold',
+        type: 'book',
+        title: 'Mission 2: HVAC no cold air',
+        caller: 'Homeowner says the AC is blowing but not cold and asks whether vans carry parts.',
+        correct: 'book',
+        proof: 'This preserves high-value trust objections while still booking the diagnostic or appointment.',
+        stakeholders: ['Homeowner', 'dispatcher', 'licensed technician', 'service manager'],
+        variables: ['symptom', 'same-day urgency', 'licensed/insured', 'employee status', 'stocked truck', 'marble floors', 'dogs', 'call-ahead'],
+        script: ['Caller: AC blows but is not cold.', 'Trust Objection Agent: I will preserve licensed, insured, stocked truck, floor, pet, and call-ahead notes.', 'Scheduler Agent: booked same-day or scheduled diagnostic.', 'Ledger Analyst: booked_lead with HVAC gross profit.']
+      },
+      {
+        id: 'safety',
+        type: 'risk',
+        title: 'Mission 3: Safety phrase appears',
+        caller: 'Caller says existing customer, AC not cooling, and carbon monoxide alarm may be going off.',
+        correct: 'escalate',
+        proof: 'Safety and human-risk language must win before booking, spam, future-module, wrong-service, or area logic.',
+        stakeholders: ['Caller', 'human escalation contact', 'business owner', 'safety guardrail'],
+        variables: ['carbon monoxide', 'gas smell', 'fire', 'electrical burning', 'active flooding', 'human request', 'low confidence'],
+        script: ['Caller: I am an existing customer and smell gas.', 'Safety Guardrail: human_required first.', 'Human Escalation Agent: stop automation and route to a person.', 'Ledger Analyst: safety row, zero revenue estimate.']
+      },
+      {
+        id: 'wrong_service',
+        type: 'waste',
+        title: 'Mission 4: Wrong service',
+        caller: 'Caller wants mold remediation and repair work from a home inspection pilot.',
+        correct: 'waste',
+        proof: 'The owner sees campaign mismatch instead of confusing the call with a sales miss.',
+        stakeholders: ['Caller', 'business owner', 'campaign owner', 'ledger analyst'],
+        variables: ['requested service', 'configured services', 'wrong-service terms', 'source'],
+        script: ['Caller: Can you do mold remediation?', 'Waste Filter Agent: not a configured service.', 'Ledger Analyst: wrong_service_or_unclear.', 'Campaign Insight Agent: tune keywords.']
+      },
+      {
+        id: 'out_of_area',
+        type: 'waste',
+        title: 'Mission 5: Out of area',
+        caller: 'Valid inspection request arrives from outside the configured ZIP codes.',
+        correct: 'waste',
+        proof: 'Geography leakage becomes a visible paid-lead waste category without lead resale.',
+        stakeholders: ['Caller', 'owner', 'source owner', 'ledger analyst'],
+        variables: ['caller ZIP', 'service ZIP list', 'lead source', 'no resale rule'],
+        script: ['Caller: I need an inspection this Friday.', 'Waste Filter Agent: ZIP is outside service area.', 'Ledger Analyst: out_of_area.', 'Pilot Reviewer: inspect source quality.']
+      },
+      {
+        id: 'vendor',
+        type: 'waste',
+        title: 'Mission 6: Vendor/spam',
+        caller: 'A vendor pitch offers SEO leads and merchant services.',
+        correct: 'waste',
+        proof: 'Staff time is protected and vendor noise is removed from paid-lead performance.',
+        stakeholders: ['Vendor caller', 'staff', 'business owner', 'ledger analyst'],
+        variables: ['vendor phrase', 'source', 'suppression reason', 'next step'],
+        script: ['Caller: Our agency can sell you leads.', 'Waste Filter Agent: spam_or_vendor.', 'Ledger Analyst: suppress from booking ROI.', 'Owner: review source quality.']
+      },
+      {
+        id: 'future_feedback',
+        type: 'future',
+        title: 'Mission 7: Existing-customer feedback',
+        caller: 'Opted-in existing customer gives sizing and warmth feedback.',
+        correct: 'future',
+        proof: 'Feedback capture is useful later, but it is not the core paid-lead intake wedge and never becomes cold calling.',
+        stakeholders: ['Existing customer', 'customer success owner', 'business owner', 'human reviewer'],
+        variables: ['existing-customer status', 'feedback theme', 'review/reorder intent', 'opt-in status'],
+        script: ['Customer: I can share feedback.', 'Feedback Capture Agent: future_module only.', 'Sentiment Summary Agent: sizing and warmth notes.', 'Ledger Analyst: exclude from paid-lead ROI.']
+      },
+      {
+        id: 'handoff',
+        type: 'setup',
+        title: 'Mission 8: Pilot and Seth handoff',
+        caller: 'Seth asks what to do after the phone demo is clear.',
+        correct: 'prove',
+        proof: 'The right next step is Ledger, ROI, setup JSON, and the two-week home inspection pilot decision checklist.',
+        stakeholders: ['Seth', 'Gary', 'pilot customer', 'human reviewer', 'implementation owner'],
+        variables: ['monthly fee', 'setup fee', 'gross margin', 'success metrics', 'zero critical escalation failures'],
+        script: ['Seth: What should I do next?', 'ROI Analyst: review recovered gross profit and payback.', 'Setup Coach: configure ZIPs, services, prices, slots, and risk rules.', 'Gary: send hosted link and full-stack ZIP privately.']
+      }
+    ];
+    let gameIndex = 0;
+    let gameScore = 0;
+    const completedGameMissions = new Set();
     let phoneLedger = [];
     let phoneEventId = 1;
     const byId = id => document.getElementById(id);
@@ -894,6 +1072,81 @@
         <div class="card"><h3>Full scripted agent conversation</h3>${item.script.map(([speaker, line]) => `<div class="script-line"><b>${escapeHtml(speaker)}</b><span>${escapeHtml(line)}</span></div>`).join('')}</div>
         <div class="card"><h3>Learning loop knowledge base and training review</h3><ol>${item.knowledge.map(value => `<li>${escapeHtml(value)}</li>`).join('')}</ol><p class="mini-label">This loop updates deterministic config, FAQs, tests, and human-reviewed playbooks. It does not train on private data inside the hosted demo.</p></div>`;
       setLiveStatus(`${item.title} lifecycle loaded.`);
+    }
+
+    function renderGame() {
+      const mission = GAME_MISSIONS[gameIndex] || GAME_MISSIONS[0];
+      const readiness = Math.round((completedGameMissions.size / GAME_MISSIONS.length) * 100);
+      const missionCount = byId('gameMissionCount');
+      const score = byId('gameScore');
+      const ready = byId('gameReadiness');
+      if (missionCount) missionCount.textContent = `${Math.min(gameIndex + 1, GAME_MISSIONS.length)}/${GAME_MISSIONS.length}`;
+      if (score) score.textContent = String(gameScore);
+      if (ready) ready.textContent = `${readiness}%`;
+      const target = byId('gameMission');
+      if (!target) return;
+      const complete = completedGameMissions.size === GAME_MISSIONS.length;
+      target.innerHTML = `${complete ? `<div class="game-complete"><h3>Ready to send Seth.</h3><p>The game covered booking, safety, waste, future-module boundaries, ROI proof, setup, and the final handoff. Next: copy/share the hosted demo text or open the full-stack package.</p></div>` : ''}
+        <article class="mission-card ${escapeHtml(mission.type)}">
+          <div class="mission-meta"><span>${escapeHtml(mission.id.replace(/_/g, ' '))}</span><span>Safety-first scoring</span></div>
+          <h3>${escapeHtml(mission.title)}</h3>
+          <p><strong>Caller situation:</strong> ${escapeHtml(mission.caller)}</p>
+          <p><strong>What this proves:</strong> ${escapeHtml(mission.proof)}</p>
+          <div class="mission-log">
+            <div class="log-row"><b>Stakeholders:</b> ${mission.stakeholders.map(escapeHtml).join(', ')}</div>
+            <div class="log-row"><b>Variables:</b> ${mission.variables.map(escapeHtml).join(', ')}</div>
+          </div>
+          <h3 style="margin-top:12px">Choose CallShield's action</h3>
+          <div class="choice-grid">${Object.entries(GAME_ACTIONS).map(([key, label]) => `<button class="choice-btn" type="button" data-action="${key}" onclick="chooseGameAction('${key}')">${escapeHtml(label)}</button>`).join('')}</div>
+        </article>`;
+    }
+
+    function chooseGameAction(action) {
+      const mission = GAME_MISSIONS[gameIndex] || GAME_MISSIONS[0];
+      const correct = action === mission.correct;
+      document.querySelectorAll('.choice-btn').forEach(button => {
+        button.classList.toggle('correct', button.dataset.action === mission.correct);
+        button.classList.toggle('missed', button.dataset.action === action && !correct);
+      });
+      if (correct && !completedGameMissions.has(mission.id)) {
+        completedGameMissions.add(mission.id);
+        gameScore += 1;
+      }
+      const feedback = byId('gameFeedback');
+      if (feedback) {
+        feedback.className = `game-feedback ${correct ? '' : 'warn'}`;
+        feedback.innerHTML = `<strong>${correct ? 'Correct operating decision.' : 'Coach correction.'}</strong>
+          <p>${correct ? escapeHtml(mission.proof) : `The safer CallShield decision is ${escapeHtml(GAME_ACTIONS[mission.correct])}. ${escapeHtml(mission.proof)}`}</p>
+          <div class="mission-log">${mission.script.map(line => `<div class="log-row">${escapeHtml(line)}</div>`).join('')}</div>`;
+      }
+      markProgress('game');
+      renderGame();
+      setLiveStatus(`${mission.title}: ${correct ? 'correct' : 'review the safer action'}.`);
+    }
+
+    function nextGameMission() {
+      gameIndex = (gameIndex + 1) % GAME_MISSIONS.length;
+      renderGame();
+      const mission = GAME_MISSIONS[gameIndex];
+      const feedback = byId('gameFeedback');
+      if (feedback) {
+        feedback.className = 'game-feedback';
+        feedback.textContent = `Next: ${mission.title}. Choose the CallShield action that protects safety and proves paid-lead value.`;
+      }
+      setLiveStatus(`${mission.title} loaded.`);
+    }
+
+    function resetGame() {
+      gameIndex = 0;
+      gameScore = 0;
+      completedGameMissions.clear();
+      renderGame();
+      const feedback = byId('gameFeedback');
+      if (feedback) {
+        feedback.className = 'game-feedback';
+        feedback.textContent = 'Game restarted. Choose the action CallShield should take for each mission.';
+      }
+      showTab('game');
     }
 
     function scenarioType(id) {
@@ -1421,7 +1674,7 @@
 OPEN THIS LINK:
 ${hostedDemoUrl()}
 
-Tap Start, then Run phone demo seed. Try Home inspection, HVAC, Safety, Wrong service, Out of area, and Vendor. Then tap Ledger and ROI.
+Tap Start, then Run phone demo seed. Tap Recovery Game for the guided operating lesson, then try Home inspection, HVAC, Safety, Wrong service, Out of area, and Vendor. Then tap Ledger and ROI.
 
 This is a static phone demo, not live phone service. It shows how CallShield classifies paid-lead intake, escalates safety risk to a human, separates lead waste, and proves recovered gross profit with a Lead Waste Ledger.`;
     }
@@ -1512,6 +1765,7 @@ This is a static phone demo, not live phone service. It shows how CallShield cla
 
     renderScenarioButtons();
     renderLifecycleCases();
+    renderGame();
     renderProgress();
     calc();
     makeConfig();
